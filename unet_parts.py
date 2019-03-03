@@ -13,7 +13,7 @@ class double_conv(nn.Module):
         super(double_conv, self).__init__()
         self.conv = nn.Conv2d(in_ch, out_ch, 3, padding=1)
         self.batch = nn.BatchNorm2d(out_ch)
-        self.relu = nn.ReLU(inplace=True),
+        self.relu = nn.ReLU(inplace=True)
         
         self.conv1 = nn.Conv2d(out_ch, out_ch, 3, padding=1)
         self.batch1 = nn.BatchNorm2d(out_ch)
