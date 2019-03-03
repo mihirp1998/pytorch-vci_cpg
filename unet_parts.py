@@ -38,7 +38,7 @@ class inconv(nn.Module):
 
     def forward(self, x):
         x = self.conv(x)
-        return xs
+        return x
 
 
 class down(nn.Module):

@@ -95,7 +95,7 @@ def resume(load_name, index):
       pretrain_unet = torch.load(checkpoint_path)
       # replace key names
       pretrain_unet = {replace(k): v for k, v in pretrain_unet.items()}
-      print("pretrain unet",pretrain_unet.keys())
+      # print("pretrain unet",pretrain_unet.keys())
       pretrain_unet_updated = {}
       for k, v in pretrain_unet.items():
         if k in unet_dict:
