@@ -129,7 +129,7 @@ def resume(load_name, index):
         else:
           print("WARNING: Unable to Load Params {}".format(k))
       unet_dict.update(pretrain_unet_updated)
-      print("Keys not Loaded ",[i for i in hypernet_dict.keys() if i not in pretrain_hypernet.keys()])
+      print("Keys not Loaded ",[i for i in unet_dict.keys() if i not in pretrain_unet_updated.keys()])
       net.load_state_dict(unet_dict)
 
 
