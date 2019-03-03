@@ -109,12 +109,28 @@ def resume(index):
 def resume(load_name, index):
   names = ['encoder', 'binarizer', 'decoder', 'unet']
   for net_idx, net in enumerate(nets):
-    if net is not None:
+    if net_idx != 3:
       name = names[net_idx]
-      checkpoint_path = '{}/{}_{}_epoch_{:08d}.pth'.format(args.model_dir,load_name, name, index)
+      checkpoint_path = '{}/{}_{}_{:08d}.pth'.format(args.model_dir, args.save_model_name, name, index)
       print('Loading %s from %s...' % (name, checkpoint_path))
       net.load_state_dict(torch.load(checkpoint_path))
+    else:
+      unet_dict = net.state_dict()
+      checkpoint_path = '{}/{}_{}_{:08d}.pth'.format(args.model_dir, args.save_model_name, name, index)
+      print('Loading %s from %s...' % (name, checkpoint_path))
+      pretrain_unet = torch.load(checkpoint_path)
+      # replace key names
+      pretrain_unet = {replace(k): v for k, v in pretrain_unet.items()}
 
+      pretrain_unet_updated = {}
+      for k, v in pretrain_unet.items():
+        if k in unet_dict:
+          pretrain_unet_updated[k] = v
+        else:
+          print("WARNING: Unable to Load Params {}".format(k))
+      unet_dict.update(pretrain_unet_updated)
+      print("Keys not Loaded ",[i for i in hypernet_dict.keys() if i not in pretrain_hypernet.keys()])
+      net.load_state_dict(unet_dict)
 
 
 def save(index):
