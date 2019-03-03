@@ -87,6 +87,7 @@ def resume(index):
         print('Loading %s from %s...' % (name, checkpoint_path))
         net.load_state_dict(torch.load(checkpoint_path))
       else:
+        name = names[net_idx]
         unet_dict = net.state_dict()
         checkpoint_path = '{}/{}_{}_{:08d}.pth'.format(args.model_dir, args.save_model_name, name, index)
         print('Loading %s from %s...' % (name, checkpoint_path))
@@ -121,7 +122,7 @@ def resume(load_name, index):
       pretrain_unet = torch.load(checkpoint_path)
       # replace key names
       pretrain_unet = {replace(k): v for k, v in pretrain_unet.items()}
-
+      print("pretrain unet",pretrain_unet)
       pretrain_unet_updated = {}
       for k, v in pretrain_unet.items():
         if k in unet_dict:
