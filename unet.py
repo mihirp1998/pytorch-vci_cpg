@@ -8,6 +8,13 @@ import torch.nn.functional as F
 # python 3 confusing imports :(
 from unet_parts import *
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+def name_parameters(model):
+    return [name for name,p in model.named_parameters() ]
+    
+
 class UNet(nn.Module):
     def __init__(self, n_channels, shrink):
         super(UNet, self).__init__()
@@ -31,3 +38,16 @@ class UNet(nn.Module):
         out2 = self.up2(out1, x3)
         out3 = self.up3(out2, x2)
         return [out1, out2, out3]
+
+if __name__ == "__main__":
+    u = UNet(3,2)
+    u.train()
+    # uname =name_parameters(u)
+    a = u.state_dict()
+    # print("params",count_parameters(u))
+    # print("num",[i for i in a.keys() if ("up" in i and "tracked" not in i) ]) 
+    print("num",sum([a[i].numel() for i in a.keys() if ("tracked" not in i) ]) )
+    print("num",[a[i] for i in a.keys() if ("tracked" in i) ]) 
+
+    # print("num",[(a[i].numel(),i) for i in a.keys() if "inc" in i])
+    # print("kes",a.keys(),len(a.keys()))

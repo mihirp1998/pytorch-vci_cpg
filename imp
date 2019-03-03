@@ -1,0 +1,20 @@
+
+inconv
+for doubleconv
+	conv.0 --> conv
+	conv.1 --> batch
+	conv.3 --> conv1
+	conv.4 --> batch1
+
+down
+	mpconv.1 --> mpconv
+	conv.0 --> conv
+	conv.1 --> batch
+	conv.3 --> conv1
+	conv.4 --> batch1
+
+up
+	conv.0 --> conv
+	conv.1 --> batch
+	conv.3 --> conv1
+	conv.4 --> batch1

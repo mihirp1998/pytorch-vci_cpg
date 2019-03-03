@@ -11,17 +11,23 @@ class double_conv(nn.Module):
     '''(conv => BN => ReLU) * 2'''
     def __init__(self, in_ch, out_ch):
         super(double_conv, self).__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(in_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(out_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
-            nn.ReLU(inplace=True)
-        )
+        self.conv = nn.Conv2d(in_ch, out_ch, 3, padding=1)
+        self.batch = nn.BatchNorm2d(out_ch)
+        self.relu = nn.ReLU(inplace=True),
+        
+        self.conv1 = nn.Conv2d(out_ch, out_ch, 3, padding=1)
+        self.batch1 = nn.BatchNorm2d(out_ch)
+        self.relu1 = nn.ReLU(inplace=True)
+        
 
     def forward(self, x):
         x = self.conv(x)
+        x = self.batch(x)
+        x = self.relu(x)
+
+        x = self.conv1(x)
+        x = self.batch1(x)
+        x = self.relu1(x)
         return x
 
 
@@ -32,18 +38,18 @@ class inconv(nn.Module):
 
     def forward(self, x):
         x = self.conv(x)
-        return x
+        return xs
 
 
 class down(nn.Module):
     def __init__(self, in_ch, out_ch):
         super(down, self).__init__()
-        self.mpconv = nn.Sequential(
-            nn.MaxPool2d(2),
-            double_conv(in_ch, out_ch)
-        )
+        self.maxpool = nn.MaxPool2d(2)
+        self.mpconv =  double_conv(in_ch, out_ch)
+
 
     def forward(self, x):
+        x = self.maxpool(x)
         x = self.mpconv(x)
         return x
 
