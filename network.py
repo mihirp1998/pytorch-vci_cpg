@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Parameter, ParameterList
-from modules import ConvLSTMCell,ConvLSTMCellTemp, Sign
+from modules import ConvLSTMCell,ConvLSTMCell, Sign
 
 
 class EncoderCell(nn.Module):
@@ -25,7 +25,7 @@ class EncoderCell(nn.Module):
         for param in self.conv.parameters():
             param.requires_grad = False
 
-        self.rnn1 = ConvLSTMCellTemp(
+        self.rnn1 = ConvLSTMCell(
             128 if fuse_encoder and v_compress else 64,
             256,
             kernel_size=3,
@@ -34,7 +34,7 @@ class EncoderCell(nn.Module):
             hidden_kernel_size=1,
             bias=False)
         # print(fuse_encoder,"fuse_encoder",v_compress,"v_compress")
-        self.rnn2 = ConvLSTMCellTemp(
+        self.rnn2 = ConvLSTMCell(
             ((384 if fuse_encoder and v_compress else 256) 
              if self.fuse_level >= 2 else 256),
             512,
@@ -44,7 +44,7 @@ class EncoderCell(nn.Module):
             hidden_kernel_size=1,
             bias=False)
 
-        self.rnn3 = ConvLSTMCellTemp(
+        self.rnn3 = ConvLSTMCell(
             ((768 if fuse_encoder and v_compress else 512) 
              if self.fuse_level >= 3 else 512),
             512,
@@ -111,7 +111,7 @@ class DecoderCell(nn.Module):
         for param in self.conv1.parameters():
             param.requires_grad = False
 
-        self.rnn1 = ConvLSTMCellTemp(
+        self.rnn1 = ConvLSTMCell(
             512,
             512,
             kernel_size=3,
@@ -120,7 +120,7 @@ class DecoderCell(nn.Module):
             hidden_kernel_size=1,
             bias=False)
 
-        self.rnn2 = ConvLSTMCellTemp(
+        self.rnn2 = ConvLSTMCell(
             (((128 + 256 // shrink * 2) if v_compress else 128) 
              if self.fuse_level >= 3 else 128), #out1=256
             512,
@@ -130,7 +130,7 @@ class DecoderCell(nn.Module):
             hidden_kernel_size=1,
             bias=False)
 
-        self.rnn3 = ConvLSTMCellTemp(
+        self.rnn3 = ConvLSTMCell(
             (((128 + 128//shrink*2) if v_compress else 128) 
              if self.fuse_level >= 2 else 128), #out2=128
             256,
@@ -140,7 +140,7 @@ class DecoderCell(nn.Module):
             hidden_kernel_size=3,
             bias=False)
 
-        self.rnn4 = ConvLSTMCellTemp(
+        self.rnn4 = ConvLSTMCell(
             (64 + 64//shrink*2) if v_compress else 64, #out3=64
             128,
             kernel_size=3,
