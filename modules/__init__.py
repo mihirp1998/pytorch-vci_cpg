@@ -1,2 +1,2 @@
-from .conv_rnn import ConvLSTMCell
+from .conv_rnn import ConvLSTMCell,ConvLSTMCellTemp
 from .sign import Sign

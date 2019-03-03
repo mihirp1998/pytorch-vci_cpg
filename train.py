@@ -68,11 +68,12 @@ if not os.path.exists(args.model_dir):
   os.makedirs(args.model_dir)
 
 def replace(kval):
+  kval = kval.replace("mpconv.1","mpconv")
   kval = kval.replace("conv.0","conv")
   kval = kval.replace("conv.1","batch")
   kval = kval.replace("conv.3","conv1")
   kval = kval.replace("conv.4","batch1")
-  kval = kval.replace("mpconv.1","mpconv")
+  #kval = kval.replace("mpconv.1","mpconv")
   return kval
 
 ############### Checkpoints ###############
@@ -116,13 +117,14 @@ def resume(load_name, index):
       print('Loading %s from %s...' % (name, checkpoint_path))
       net.load_state_dict(torch.load(checkpoint_path))
     else:
+      name = names[net_idx]
       unet_dict = net.state_dict()
       checkpoint_path = '{}/{}_{}_epoch_{:08d}.pth'.format(args.model_dir, load_name, name, index)
       print('Loading %s from %s...' % (name, checkpoint_path))
       pretrain_unet = torch.load(checkpoint_path)
       # replace key names
       pretrain_unet = {replace(k): v for k, v in pretrain_unet.items()}
-      print("pretrain unet",pretrain_unet)
+      print("pretrain unet",pretrain_unet.keys())
       pretrain_unet_updated = {}
       for k, v in pretrain_unet.items():
         if k in unet_dict:
