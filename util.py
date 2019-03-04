@@ -13,6 +13,8 @@ import network
 from metric import msssim, psnr
 from unet import UNet
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 def get_models(args, v_compress, bits, encoder_fuse_level, decoder_fuse_level,num_vids):
 
@@ -37,6 +39,11 @@ def get_models(args, v_compress, bits, encoder_fuse_level, decoder_fuse_level,nu
         unet = None
 
     hypernet = network.HyperNetwork(num_vids).cuda()
+    print("hypernet ",count_parameters(hypernet))    
+    print("encoder ",count_parameters(encoder))    
+    print("decoder ",count_parameters(decoder))    
+    print("binarizer ",count_parameters(binarizer)) 
+    print("unet ",count_parameters(unet))
 
     return encoder, binarizer, decoder, unet, hypernet
 
