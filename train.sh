@@ -7,9 +7,9 @@ hier=$1
 modeldir=model
 
 train="data/train"
-eval="data/eval"
+eval="data/temp_eval"
 train_mv="data/train_mv"
-eval_mv="data/eval_mv"
+eval_mv="data/temp_eval_mv"
 
 if [[ ${hier} == "0" ]]; then
   distance1=6
@@ -54,5 +54,6 @@ python -u train.py \
   --distance1 ${distance1} --distance2 ${distance2} \
   --load-iter ${load_iter} \
   --load-model-name ${load_model_name} \
-  --max-train-iters 10000 \
-  --save-out-img
+  --max-train-iters 10001 \
+  --save-out-img \
+  --checkpoint-iters 2500

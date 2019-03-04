@@ -1,12 +1,13 @@
 from eval_dataset import get_loader as eval_get_loader
 from train_options import parser
 from util import get_models, init_lstm, set_train, set_eval
-
-
+import torch
+from evaluate import run_eval
+import time
 
 def get_eval_loaders():
   eval_loader,vid_count = eval_get_loader(is_train=False,root=args.eval, mv_dir=args.eval_mv,n_work=0,args=args)
- 
+
   return eval_loader,vid_count
 
 def replace(kval):
@@ -49,7 +50,7 @@ def resume(load_name, index):
 
 args = parser.parse_args()
 print(args)
-eval_loaders,vid_count = get_eval_loaders()
+eval_loader,vid_count = get_eval_loaders()
 ############### Model ###############
 encoder, binarizer, decoder, unet,hypernet = get_models(
   args=args, v_compress=args.v_compress, 
@@ -77,7 +78,7 @@ if just_resumed:
 
   eval_begin = time.time()
   eval_loss, mssim, psnr = run_eval(nets, eval_loader, args,
-      output_suffix='iter%d' % train_iter)
+      output_suffix='iter%d' % 0)
 
   print('Evaluation @iter %d done in %d secs' % (
       train_iter, time.time() - eval_begin))

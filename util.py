@@ -234,7 +234,7 @@ def forward_model(model, cooked_batch, ctx_frames,id_num, args, v_compress,
     out_img = torch.zeros(1, 3, height, width) + 0.5
     out_imgs = []
     losses = []
-
+    print("idnum ",id_num)
     wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
     # UNet.
     with torch.no_grad():

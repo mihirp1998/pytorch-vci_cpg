@@ -336,7 +336,7 @@ class ImageFolder(data.Dataset):
     def __getitem__(self, index):
         random.shuffle(self.id_names)
         vidname = self.id_names[index]
-        print(index)
+        #print(index)
         random.shuffle(self.d[vidname])
         filenames = self.d[vidname][:10]
         self.id_num = self.vid2id[vidname]
