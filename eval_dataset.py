@@ -185,6 +185,8 @@ class ImageFolder(data.Dataset):
         # self.vid_freq,self.vid2id = self.genIds()
         # pickle.dump(self.vid2id,open("train_dict.p","wb"))
         self.vid2id = pickle.load(open("train_dict.p","rb"))
+        self.vid_count = len(self.vid2id.keys())
+        print("num of videos {} ".format(self.vid_count))
 
         if is_train:
             random.shuffle(self.imgs)
@@ -205,8 +207,7 @@ class ImageFolder(data.Dataset):
         for w, c in self.d.items():
             self.vid2id[w] = vid
             vid +=1
-        self.vid_count = len(self.vid2id.keys())
-        print("num of videos {} ".format(self.vid_count))
+
 
     def _load_image_list(self):
         self.imgs = []
