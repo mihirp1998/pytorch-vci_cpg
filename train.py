@@ -139,9 +139,9 @@ while True:
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
         scheduler.step()
         train_iter += 1
-        pickle.dump(crops,open("crop.p","wb"))
-        pickle.dump(ctx_frames,open("ctx_frames.p","wb"))
-        pickle.dump(id_num,open("id_num.p","wb"))
+        crops = pickle.load(open("crop.p","rb"))
+        ctx_frames = pickle.load(open("ctx_frames.p","rb"))
+        id_num = pickle.load(open("id_num.p","rb"))
 
         if train_iter > args.max_train_iters:
           break
