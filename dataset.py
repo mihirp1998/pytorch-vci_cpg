@@ -99,8 +99,8 @@ def crop_cv2(img, patch):
     height, width, c = img.shape
     start_x = random.randint(0, height - patch)
     start_y = random.randint(0, width - patch)
-    start_y = 30
-    start_x = 30
+    #start_y = 30
+    #start_x = 30
     return img[start_x : start_x + patch, start_y : start_y + patch]
 
 
