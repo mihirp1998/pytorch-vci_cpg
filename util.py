@@ -14,7 +14,7 @@ from metric import msssim, psnr
 from unet import UNet
 
 
-def get_models(args, v_compress, bits, encoder_fuse_level, decoder_fuse_level):
+def get_models(args, v_compress, bits, encoder_fuse_level, decoder_fuse_level,num_vids):
 
     encoder = network.EncoderCell(
         v_compress=v_compress,
@@ -36,7 +36,9 @@ def get_models(args, v_compress, bits, encoder_fuse_level, decoder_fuse_level):
     else:
         unet = None
 
-    return encoder, binarizer, decoder, unet
+    hypernet = network.HyperNetwork(num_vids).cuda()
+
+    return encoder, binarizer, decoder, unet, hypernet
 
 
 def get_identity_grid(size):
@@ -186,14 +188,14 @@ def prepare_inputs(crops, args, unet_output1, unet_output2):
     return res, frame1, frame2, warped_unet_output1, warped_unet_output2
 
 
-def forward_ctx(unet, ctx_frames):
+def forward_ctx(unet, ctx_frames,unet_kernels,unet_bias):
     ctx_frames = Variable(ctx_frames.cuda()) - 0.5
     frame1 = ctx_frames[:, :3]
     frame2 = ctx_frames[:, 3:]
 
     unet_output1, unet_output2 = [], []
 
-    unet_outputs = unet(torch.cat([frame1, frame2], dim=0))
+    unet_outputs = unet(torch.cat([frame1, frame2], dim=0),unet_kernels,unet_bias)
     for u_out in unet_outputs:
         u_out1, u_out2 = u_out.chunk(2, dim=0)
         unet_output1.append(u_out1)

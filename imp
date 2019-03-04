@@ -17,4 +17,54 @@ up
 	conv.0 --> conv
 	conv.1 --> batch
 	conv.3 --> conv1
-	conv.4 --> batch1
+	conv.4 --> 
+
+
+inc
+
+doubleconv
+conv_w [32,3,3,3]
+conv1_w [32,32,3,3]
+
+down1
+
+doubleconv
+conv_w [64,32,3,3]
+conv1_w [64,64,3,3]
+
+down2
+
+doubleconv
+
+conv_w [128,64,3,3]
+conv1_w [128,128,3,3]
+
+
+down3
+
+doubleconv
+
+conv_w [256,128,3,3]
+conv1_w [256,256,3,3]
+
+down4
+
+conv_w [256,256,3,3]
+conv1_w [256,256,3,3]
+
+
+up1
+
+conv_w [128,512,3,3]
+conv1_w [128,128,3,3]
+
+up2
+
+conv_w [64,256,3,3]
+conv1_w [64,64,3,3]
+
+up3
+
+con_w [32,64,3,3]
+conv1_w [32,32,3,3]
+

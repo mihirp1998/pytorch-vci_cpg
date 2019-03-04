@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import Parameter, ParameterList
-from modules import ConvLSTMCell,ConvLSTMCell, Sign
+from modules import ConvLSTMCellTemp as ConvLSTMCell, Sign
 
 
 class EncoderCell(nn.Module):
@@ -56,26 +56,28 @@ class EncoderCell(nn.Module):
 
 
     def forward(self, input, hidden1, hidden2, hidden3,
-                unet_output1, unet_output2):
+                unet_output1, unet_output2,wenc):
+        init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = conv_w
+        init_conv=  self.conv.weight + init_conv
 
-        x = self.conv(input)
+        x= F.conv2d(input,init_conv,stride=2,padding=1)
         # Fuse
         if self.v_compress and self.fuse_encoder:
             x = torch.cat([x, unet_output1[2], unet_output2[2]], dim=1)
 
-        hidden1 = self.rnn1(x, hidden1)
+        hidden1 = self.rnn1(x,rnn1_i,rnn1_h, hidden1)
         x = hidden1[0]
         # Fuse.
         if self.v_compress and self.fuse_encoder and self.fuse_level >= 2:
             x = torch.cat([x, unet_output1[1], unet_output2[1]], dim=1)
 
-        hidden2 = self.rnn2(x, hidden2)
+        hidden2 = self.rnn2(x,rnn2_i,rnn2_h,hidden2)
         x = hidden2[0]
         # Fuse.
         if self.v_compress and self.fuse_encoder and self.fuse_level >= 3:
             x = torch.cat([x, unet_output1[0], unet_output2[0]], dim=1)
 
-        hidden3 = self.rnn3(x, hidden3)
+        hidden3 = self.rnn3(x,rnn3_i,rnn3_h,hidden3)
         x = hidden3[0]
         return x, hidden1, hidden2, hidden3
 
@@ -88,8 +90,9 @@ class Binarizer(nn.Module):
             param.requires_grad = False
         self.sign = Sign()
 
-    def forward(self, input):
-        feat = self.conv(input)
+    def forward(self, input,init_conv):
+        init_conv =  self.conv.weight + init_conv
+        feat = F.conv2d(input,init_conv,stride=1,padding=0)
         x = F.tanh(feat)
         return self.sign(x)
 
@@ -158,10 +161,15 @@ class DecoderCell(nn.Module):
             param.requires_grad = False
 
     def forward(self, input, hidden1, hidden2, hidden3, hidden4,
-                unet_output1, unet_output2):
+                unet_output1, unet_output2,wdec):
+        init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h,rnn4_i,rnn4_h,final_conv = wdec
 
-        x = self.conv1(input)
-        hidden1 = self.rnn1(x, hidden1)
+        init_conv = init_conv + self.conv1.weight
+
+        x= F.conv2d(input,init_conv,stride=1,padding=0)
+
+        # x = self.conv1(input)
+        hidden1 = self.rnn1(x,rnn1_i,rnn1_h,hidden1)
 
         # rnn 2
         x = hidden1[0]
@@ -170,7 +178,7 @@ class DecoderCell(nn.Module):
         if self.v_compress and self.fuse_level >= 3:
             x = torch.cat([x, unet_output1[0], unet_output2[0]], dim=1)
 
-        hidden2 = self.rnn2(x, hidden2)
+        hidden2 = self.rnn2(x,rnn2_i,rnn2_h, hidden2)
 
         # rnn 3
         x = hidden2[0]
@@ -179,7 +187,7 @@ class DecoderCell(nn.Module):
         if self.v_compress and self.fuse_level >= 2:
             x = torch.cat([x, unet_output1[1], unet_output2[1]], dim=1)
 
-        hidden3 = self.rnn3(x, hidden3)
+        hidden3 = self.rnn3(x,rnn3_i,rnn3_h,hidden3)
 
         # rnn 4
         x = hidden3[0]
@@ -188,13 +196,17 @@ class DecoderCell(nn.Module):
         if self.v_compress:
             x = torch.cat([x, unet_output1[2], unet_output2[2]], dim=1)
 
-        hidden4 = self.rnn4(x, hidden4)
+        hidden4 = self.rnn4(x, rnn4_i, rnn4_h, hidden4)
 
         # final
         x = hidden4[0]
         x = F.pixel_shuffle(x, 2)
 
-        x = F.tanh(self.conv2(x)) / 2
+        final_conv = final_conv + self.conv2.weight
+        x= F.conv2d(x,final_conv,stride=1,padding=0)
+
+        x = F.tanh(x) / 2
+    
         return x, hidden1, hidden2, hidden3, hidden4
 
 class HyperNetwork(nn.Module):
@@ -211,17 +223,22 @@ class HyperNetwork(nn.Module):
         self.enclayer =   [[64,9,3,3]]+[[1024,128,3,3]]+[[1024,256,1,1]]+[[2048,384,3,3]]+[[2048,512,1,1]]+[[2048,512,3,3]]+[[2048,512,1,1]]
         self.declayer = [[512,8,1,1]]+[[2048,512,3,3]]+[[2048,512,1,1]]+[[2048,128,3,3]]+[[2048,512,1,1]]+[[1024,128,3,3]]+[[1024,256,3,3]]+[[512,128,3,3]]+[[512,128,3,3]]+[[3,32,1,1]]
         self.binlayer=   [[8,512,1,1]]
+        self.unetconvlayer = [[32,3,3,3],[32,32,3,3],[64,32,3,3],[64,64,3,3],[128,64,3,3],[128,128,3,3],[256,128,3,3],[256,256,3,3],[256,256,3,3],[128,512,3,3],[128,128,3,3],[64,256,3,3],[64,64,3,3],[32,64,3,3],[32,32,3,3]]
 
         # layer = np.array(declayer+enclayer+binlayer)
 
-        self.encoderWeights = nn.ParameterList([Parameter(torch.nn.init.xavier_normal_(torch.empty(emb_dimension, self.total(i)) )) for i in self.enclayer])
-        self.decoderWeights = nn.ParameterList([Parameter(torch.nn.init.xavier_normal_(torch.empty(emb_dimension, self.total(i)) )) for i in self.declayer])
-        self.binWeights = nn.ParameterList([Parameter(torch.nn.init.xavier_normal_(torch.empty(emb_dimension, self.total(i)) )) for i in self.binlayer])
+        self.encoderWeights = nn.ParameterList([Parameter(torch.zeros(emb_dimension, self.total(i)) ) for i in self.enclayer])
+        self.decoderWeights = nn.ParameterList([Parameter(torch.zeros(emb_dimension, self.total(i)) ) for i in self.declayer])
+        self.binWeights = nn.ParameterList([Parameter(torch.zeros(emb_dimension, self.total(i)) ) for i in self.binlayer])
+        self.unetConvW_weights = nn.ParameterList([Parameter(torch.zeros(emb_dimension, self.total(i)) ) for i in self.unetconvlayer])
+        self.unetConvB_weights = nn.ParameterList([Parameter(torch.zeros(emb_dimension, i[0]) ) for i in self.unetconvlayer])
 
         #self.w1 =torch.nn.init.xavier_normal(self.w1)
         self.encoderBias = nn.ParameterList([Parameter(torch.fmod(torch.zeros((self.total(i))),2)) for i in self.enclayer])
         self.decoderBias = nn.ParameterList([Parameter(torch.fmod(torch.zeros((self.total(i))),2)) for i in self.declayer])
         self.binBias = nn.ParameterList([Parameter(torch.fmod(torch.zeros((self.total(i))),2)) for i in self.binlayer])
+        self.unetConvW_bias = nn.ParameterList([Parameter(torch.zeros(self.total(i)) ) for i in self.unetconvlayer])
+        self.unetConvB_bias = nn.ParameterList([Parameter(torch.zeros(i[0]) ) for i in self.unetconvlayer])
         #self.b1 =torch.nn.init.xavier_normal(self.b1)
 
         #self.w2 = Parameter(torch.fmod(torch.randn((h,f)),2))
@@ -236,15 +253,18 @@ class HyperNetwork(nn.Module):
         enc_kernels = [(torch.matmul(contextEmbed,self.encoderWeights[i])  + self.encoderBias[i]).view(self.enclayer[i]) for i in range(len(self.encoderWeights))]
         dec_kernels = [(torch.matmul(contextEmbed,self.decoderWeights[i])  + self.decoderBias[i]).view(self.declayer[i]) for i in range(len(self.decoderWeights))]
         bin_kernels = [(torch.matmul(contextEmbed,self.binWeights[i])  + self.binBias[i]).view(self.binlayer[i]) for i in range(len(self.binWeights))]
+        unet_kernels = [(torch.matmul(contextEmbed,self.unetConvW_weights[i])  + self.unetConvW_bias[i]).view(self.unetconvlayer[i]) for i in range(len(self.unetconvlayer))]
+        unet_bias = [(torch.matmul(contextEmbed,self.unetConvB_weights[i])  + self.unetConvB_bias[i]).view(self.unetconvlayer[i][0]) for i in range(len(self.unetconvlayer))]
 
         # h_final = self.linear(contextEmbed
         # print(enc_kernels[0].shape)
 
-        return enc_kernels,dec_kernels,bin_kernels[0]
+        return enc_kernels,dec_kernels,bin_kernels[0],unet_kernels,unet_bias
 
 
 if __name__ == "__main__":
     hn = HyperNetwork(10)
-    a,b,c = hn(torch.tensor(2))
+    a,b,c,d,e = hn(torch.tensor(2))
     print([i.shape for i in a],[i.shape for i in b],c.shape)
+    print([i.shape for i in d  ],[i.shape for i in e])
 

@@ -26,6 +26,7 @@ train_loader = get_loader(
 
 def get_eval_loaders():
   # We can extend this dict to evaluate on multiple datasets.
+  # change this later
   eval_loaders = {
     'TVL': get_loader(
         is_train=False,
@@ -37,11 +38,11 @@ def get_eval_loaders():
 
 
 ############### Model ###############
-encoder, binarizer, decoder, unet = get_models(
+encoder, binarizer, decoder, unet,hypernet = get_models(
   args=args, v_compress=args.v_compress, 
   bits=args.bits,
   encoder_fuse_level=args.encoder_fuse_level,
-  decoder_fuse_level=args.decoder_fuse_level)
+  decoder_fuse_level=args.decoder_fuse_level,num_vids=args.)
 
 nets = [encoder, binarizer, decoder]
 if unet is not None:
@@ -134,7 +135,7 @@ if args.load_model_name:
 
 while True:
 
-    for batch, (crops, ctx_frames, _) in enumerate(train_loader):
+    for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
         scheduler.step()
         train_iter += 1
 
@@ -145,15 +146,18 @@ while True:
 
         solver.zero_grad()
 
+        id_num = Variable(id_num.cuda())
+
         # Init LSTM states.
         (encoder_h_1, encoder_h_2, encoder_h_3,
          decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4) = init_lstm(
             batch_size=(crops[0].size(0) * args.num_crops), height=crops[0].size(2),
             width=crops[0].size(3), args=args)
 
+         wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
         # Forward U-net.
         if args.v_compress:
-            unet_output1, unet_output2 = forward_ctx(unet, ctx_frames)
+            unet_output1, unet_output2 = forward_ctx(unet, ctx_frames,unet_kernels,unet_bias)
         else:
             unet_output1 = Variable(torch.zeros(args.batch_size,)).cuda()
             unet_output2 = Variable(torch.zeros(args.batch_size,)).cuda()
@@ -177,15 +181,15 @@ while True:
             # Encode.
             encoded, encoder_h_1, encoder_h_2, encoder_h_3 = encoder(
                 encoder_input, encoder_h_1, encoder_h_2, encoder_h_3,
-                warped_unet_output1, warped_unet_output2)
+                warped_unet_output1, warped_unet_output2,wenc)
 
             # Binarize.
-            codes = binarizer(encoded)
+            codes = binarizer(encoded,wbin)
 
             # Decode.
             (output, decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4) = decoder(
                 codes, decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4,
-                warped_unet_output1, warped_unet_output2)
+                warped_unet_output1, warped_unet_output2,wdec)
 
             res = res - output
             out_img = out_img + output.data
@@ -220,28 +224,28 @@ while True:
         if train_iter % args.checkpoint_iters == 0:
             save(train_iter)
 
-        if just_resumed or train_iter % args.eval_iters == 0 or train_iter == 100:
-            print('Start evaluation...')
+        # if just_resumed or train_iter % args.eval_iters == 0 or train_iter == 100:
+        #     print('Start evaluation...')
 
-            set_eval(nets)
+        #     set_eval(nets)
 
-            eval_loaders = get_eval_loaders()
-            for eval_name, eval_loader in eval_loaders.items():
-                eval_begin = time.time()
-                eval_loss, mssim, psnr = run_eval(nets, eval_loader, args,
-                    output_suffix='iter%d' % train_iter)
+        #     eval_loaders = get_eval_loaders()
+        #     for eval_name, eval_loader in eval_loaders.items():
+        #         eval_begin = time.time()
+        #         eval_loss, mssim, psnr = run_eval(nets, eval_loader, args,
+        #             output_suffix='iter%d' % train_iter)
 
-                print('Evaluation @iter %d done in %d secs' % (
-                    train_iter, time.time() - eval_begin))
-                print('%s Loss   : ' % eval_name
-                      + '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
-                print('%s MS-SSIM: ' % eval_name
-                      + '\t'.join(['%.5f' % el for el in mssim.tolist()]))
-                print('%s PSNR   : ' % eval_name
-                      + '\t'.join(['%.5f' % el for el in psnr.tolist()]))
+        #         print('Evaluation @iter %d done in %d secs' % (
+        #             train_iter, time.time() - eval_begin))
+        #         print('%s Loss   : ' % eval_name
+        #               + '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
+        #         print('%s MS-SSIM: ' % eval_name
+        #               + '\t'.join(['%.5f' % el for el in mssim.tolist()]))
+        #         print('%s PSNR   : ' % eval_name
+        #               + '\t'.join(['%.5f' % el for el in psnr.tolist()]))
 
-            set_train(nets)
-            just_resumed = False
+        #     set_train(nets)
+        #     just_resumed = False
 
 
     if train_iter > args.max_train_iters:

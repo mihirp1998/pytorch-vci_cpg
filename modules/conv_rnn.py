@@ -134,7 +134,7 @@ class ConvLSTMCellTemp(ConvRNNCellBase):
             param.requires_grad = False
           
 
-    def forward(self, input ,conv_w_i, conv_w_h, hidden,batchsize):
+    def forward(self, input ,conv_w_i, conv_w_h, hidden):
         hx, cx = hidden
 
         conv_w_i = self.conv_ih.weight + conv_w_i

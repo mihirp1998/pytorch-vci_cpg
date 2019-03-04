@@ -15,17 +15,31 @@ class double_conv(nn.Module):
         self.batch = nn.BatchNorm2d(out_ch)
         self.relu = nn.ReLU(inplace=True)
         
+        for param in self.conv.parameters():
+            param.requires_grad = False
+
         self.conv1 = nn.Conv2d(out_ch, out_ch, 3, padding=1)
         self.batch1 = nn.BatchNorm2d(out_ch)
         self.relu1 = nn.ReLU(inplace=True)
+
+        for param in self.conv1.parameters():
+            param.requires_grad = False
         
 
-    def forward(self, x):
-        x = self.conv(x)
+    def forward(self, x,conv_ws,conv_bs):
+        conv_w = conv_ws[0] + self.conv.weight
+        conv_b = conv_bs[0] + self.conv.bias
+        # x = self.conv(x)
+        x= F.conv2d(x,conv_w,conv_b,padding=1)
+
         x = self.batch(x)
         x = self.relu(x)
 
-        x = self.conv1(x)
+        conv1_w = conv_ws[1] + self.conv1.weight
+        conv1_b = conv_bs[1] + self.conv1.bias
+
+        x= F.conv2d(x,conv1_w,conv1_b,padding=1)
+        # x = self.conv1(x)
         x = self.batch1(x)
         x = self.relu1(x)
         return x
@@ -36,8 +50,8 @@ class inconv(nn.Module):
         super(inconv, self).__init__()
         self.conv = double_conv(in_ch, out_ch)
 
-    def forward(self, x):
-        x = self.conv(x)
+    def forward(self, x, conv_w, conv_b):
+        x = self.conv(x,conv_w,conv_b)
         return x
 
 
@@ -48,9 +62,9 @@ class down(nn.Module):
         self.mpconv =  double_conv(in_ch, out_ch)
 
 
-    def forward(self, x):
+    def forward(self, x, conv_w, conv_b):
         x = self.maxpool(x)
-        x = self.mpconv(x)
+        x = self.mpconv(x, conv_w, conv_b)
         return x
 
 
@@ -65,7 +79,7 @@ class up(nn.Module):
         else:
             self.up = nn.ConvTranspose2d(in_ch, out_ch, 2, stride=2)
 
-        self.conv = double_conv(in_ch, out_ch)
+        self.conv = double_conv(in_ch, out_ch, conv_w, conv_b)
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
@@ -74,7 +88,7 @@ class up(nn.Module):
         x2 = F.pad(x2, (diffX // 2, int(diffX / 2),
                         diffY // 2, int(diffY / 2)))
         x = torch.cat([x2, x1], dim=1)
-        x = self.conv(x)
+        x = self.conv(x, conv_w, conv_b)
         return x
 
 
