@@ -82,7 +82,7 @@ class up(nn.Module):
 
         self.conv = double_conv(in_ch, out_ch)
 
-    def forward(self, x1, x2):
+    def forward(self, x1, x2,conv_w, conv_b):
         x1 = self.up(x1)
         diffX = x1.size()[2] - x2.size()[2]
         diffY = x1.size()[3] - x2.size()[3]
