@@ -57,7 +57,7 @@ class EncoderCell(nn.Module):
 
     def forward(self, input, hidden1, hidden2, hidden3,
                 unet_output1, unet_output2,wenc):
-        init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = conv_w
+        init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = wenc
         init_conv=  self.conv.weight + init_conv
 
         x= F.conv2d(input,init_conv,stride=2,padding=1)
