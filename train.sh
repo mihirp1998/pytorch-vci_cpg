@@ -54,5 +54,5 @@ python -u train.py \
   --distance1 ${distance1} --distance2 ${distance2} \
   --load-iter ${load_iter} \
   --load-model-name ${load_model_name} \
-  --max-train-iters 100 \
+  --max-train-iters 10000 \
   --save-out-img
