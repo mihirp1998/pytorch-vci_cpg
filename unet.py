@@ -26,7 +26,7 @@ class UNet(nn.Module):
         self.up1 = up(1024 // shrink, 256 // shrink)
         self.up2 = up(512 // shrink, 128 // shrink)
         self.up3 = up(256 // shrink, 64 // shrink)
-        self.up4 = up(128 // shrink, 64 // shrink)
+        # self.up4 = up(128 // shrink, 64 // shrink)
 
     def forward(self, x, unet_kernels,unet_bias):
         x1 = self.inc(x, unet_kernels[0:2],unet_bias[0:2])
