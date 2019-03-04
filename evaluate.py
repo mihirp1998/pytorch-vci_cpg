@@ -72,7 +72,7 @@ def run_eval(model, eval_loader, args, output_suffix=''):
   all_losses, all_msssim, all_psnr = [], [], []
 
   start_time = time.time()
-  for i, (batch, ctx_frames, filenames) in enumerate(eval_loader):
+  for i, (batch, ctx_frames, filenames,id_num) in enumerate(eval_loader):
       with torch.no_grad():
       	batch = Variable(batch.cuda())
 

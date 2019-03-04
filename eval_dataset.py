@@ -9,9 +9,6 @@ import random
 import cv2
 from collections import defaultdict
 import pickle
-from joblib import delayed
-from joblib import Parallel
-random.seed(42)
 
 def get_loader(is_train, root, mv_dir,n_work, args):
     print('\nCreating loader for %s...' % root)
@@ -25,16 +22,16 @@ def get_loader(is_train, root, mv_dir,n_work, args):
 
     loader = data.DataLoader(
         dataset=dset,
-        batch_size=1,
+        batch_size=args.batch_size if is_train else args.eval_batch_size,
         shuffle=is_train,
-        num_workers=0
+        num_workers=n_work
     )
 
-    # print('Loader for {} images ({} batches) created.'.format(
-    #     len(dset), len(loader))
-    # )
+    print('Loader for {} images ({} batches) created.'.format(
+        len(dset), len(loader))
+    )
 
-    return dset
+    return loader, dset.vid_count
 
 
 def default_loader(path):
@@ -103,8 +100,7 @@ def crop_cv2(img, patch):
     height, width, c = img.shape
     start_x = random.randint(0, height - patch)
     start_y = random.randint(0, width - patch)
-    #start_x =30
-    #start_y =30
+
     return img[start_x : start_x + patch, start_y : start_y + patch]
 
 
@@ -184,10 +180,12 @@ class ImageFolder(data.Dataset):
         self.identity_grid = None
 
         self._load_image_list()
+
         self.perVideoInfo()
         # self.vid_freq,self.vid2id = self.genIds()
         # pickle.dump(self.vid2id,open("train_dict.p","wb"))
         self.vid2id = pickle.load(open("train_dict.p","rb"))
+
         if is_train:
             random.shuffle(self.imgs)
 
@@ -209,7 +207,6 @@ class ImageFolder(data.Dataset):
             vid +=1
         self.vid_count = len(self.vid2id.keys())
         print("num of videos {} ".format(self.vid_count))
-
 
     def _load_image_list(self):
         self.imgs = []
@@ -263,7 +260,10 @@ class ImageFolder(data.Dataset):
         img = self.loader(filename)
         return img, filename
 
-    def load_data(self,filename):
+    def __getitem__(self, index):
+        filename = self.imgs[index]
+        id_val = filename.split("/")[2][:-9]
+        id_num = self.vid2id[id_val]
         if self.v_compress:
             img, main_fn = self.get_group_data(filename)
         else:
@@ -328,49 +328,23 @@ class ImageFolder(data.Dataset):
         ctx_frames /= 255.0
         ctx_frames = np_to_torch(ctx_frames)
 
-        self.data_s.append(torch.stack(data))
-        self.ctx_frames_s.append(ctx_frames)
-        self.main_fn_s.append(main_fn)
-
-
-    def __getitem__(self, index):
-        random.shuffle(self.id_names)
-        vidname = self.id_names[index]
-        print(index)
-        random.shuffle(self.d[vidname])
-        filenames = self.d[vidname][:10]
-        self.id_num = self.vid2id[vidname]
-        self.data_s = []
-        self.ctx_frames_s = []
-        self.main_fn_s = []
-        for i in filenames:
-            self.load_data(i)
-        # status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
-        self.data_s, self.ctx_frames_s = (torch.stack(self.data_s).transpose(0,1),torch.stack(self.ctx_frames_s))
-        return self.data_s, self.ctx_frames_s, self.main_fn_s,self.id_num
+        return data, ctx_frames, main_fn, id_num
 
     def __len__(self):
-        return len(self.id_names)
+        return len(self.imgs)
 
 if __name__ == "__main__":
     train="data/train"
     train_mv="data/train_mv"
     from tempArg import TempArgument
-    args = TempArgument(distance1=1,distance2=2,warp=True,v_compress=True,patch=64,num_crops=2,batch_size=1)
+    args = TempArgument(distance1=1,distance2=2,warp=True,v_compress=True,patch=64,num_crops=2,batch_size=3)
     print(args)
-    # dset = ImageFolder(
-    #     is_train=True,
-    #     root=train,
-    #     mv_dir=train_mv,
-    #     args=args,
-    # )
-
+    dset = ImageFolder(
+        is_train=True,
+        root=train,
+        mv_dir=train_mv,
+        args=args,
+    )
     train_loader = get_loader(is_train=True,root=train, mv_dir=train_mv,n_work=0,args=args)
-
-    for m,j,k,d in train_loader: 
-        print("k")
-    # from IPython import embed 
-    # embed()
-
-
-
+    from IPython import embed 
+    embed()

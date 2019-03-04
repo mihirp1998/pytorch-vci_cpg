@@ -9,6 +9,7 @@ import torch.optim.lr_scheduler as LS
 from torch.autograd import Variable
 
 from dataset import get_loader
+from eval_dataset import get_loader as eval_get_loader
 from evaluate import run_eval
 from train_options import parser
 from util import get_models, init_lstm, set_train, set_eval
@@ -28,7 +29,7 @@ def get_eval_loaders():
   # We can extend this dict to evaluate on multiple datasets.
   # change this later
   eval_loaders = {
-    'TVL': get_loader(
+    'TVL': eval_get_loader(
         is_train=False,
         root=args.eval, mv_dir=args.eval_mv,n_work=0,
         args=args),
@@ -109,14 +110,11 @@ def resume(load_name, index):
 
 
 def save(index):
-  names = ['encoder', 'binarizer', 'decoder', 'unet']
 
-  for net_idx, net in enumerate(nets):
-    if net is not None:
-      torch.save(encoder.state_dict(), 
-                 '{}/{}_{}_{:08d}.pth'.format(
-                   args.model_dir, args.save_model_name, 
-                   names[net_idx], index))
+  # for net_idx, net in enumerate(nets):
+  #   if net is not None:
+  torch.save(unet.state_dict(),'{}/{}_{}_{:08d}.pth'.format(args.model_dir, args.save_model_name,"unet", index))
+  torch.save(hypernet.state_dict(),'{}/{}_{}_{:08d}.pth'.format(args.model_dir, args.save_model_name,"hypernet", index))
 
 
 ############### Training ###############
@@ -229,28 +227,28 @@ while True:
         if train_iter % args.checkpoint_iters == 0:
             save(train_iter)
 
-        # if just_resumed or train_iter % args.eval_iters == 0 or train_iter == 100:
-        #     print('Start evaluation...')
+        if just_resumed or train_iter % args.eval_iters == 0 or train_iter == 100:
+            print('Start evaluation...')
 
-        #     set_eval(nets)
+            set_eval(nets)
 
-        #     eval_loaders = get_eval_loaders()
-        #     for eval_name, eval_loader in eval_loaders.items():
-        #         eval_begin = time.time()
-        #         eval_loss, mssim, psnr = run_eval(nets, eval_loader, args,
-        #             output_suffix='iter%d' % train_iter)
+            eval_loaders = get_eval_loaders()
+            for eval_name, eval_loader in eval_loaders.items():
+                eval_begin = time.time()
+                eval_loss, mssim, psnr = run_eval(nets, eval_loader, args,
+                    output_suffix='iter%d' % train_iter)
 
-        #         print('Evaluation @iter %d done in %d secs' % (
-        #             train_iter, time.time() - eval_begin))
-        #         print('%s Loss   : ' % eval_name
-        #               + '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
-        #         print('%s MS-SSIM: ' % eval_name
-        #               + '\t'.join(['%.5f' % el for el in mssim.tolist()]))
-        #         print('%s PSNR   : ' % eval_name
-        #               + '\t'.join(['%.5f' % el for el in psnr.tolist()]))
+                print('Evaluation @iter %d done in %d secs' % (
+                    train_iter, time.time() - eval_begin))
+                print('%s Loss   : ' % eval_name
+                      + '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
+                print('%s MS-SSIM: ' % eval_name
+                      + '\t'.join(['%.5f' % el for el in mssim.tolist()]))
+                print('%s PSNR   : ' % eval_name
+                      + '\t'.join(['%.5f' % el for el in psnr.tolist()]))
 
-        #     set_train(nets)
-        #     just_resumed = False
+            set_train(nets)
+            just_resumed = False
 
 
     if train_iter > args.max_train_iters:

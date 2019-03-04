@@ -134,7 +134,7 @@ def set_train(models):
 
 
 def eval_forward(model, batch, args):
-    batch, ctx_frames = batch
+    batch, ctx_frames,id_num = batch
     cooked_batch = prepare_batch(
         batch, args.v_compress, args.warp)
 
@@ -142,7 +142,7 @@ def eval_forward(model, batch, args):
     return forward_model(
         model=model,
         cooked_batch=cooked_batch,
-        ctx_frames=ctx_frames,
+        ctx_frames=ctx_frames,id_num=id_num,
         args=args,
         v_compress=args.v_compress,
         iterations=args.iterations,
@@ -150,9 +150,9 @@ def eval_forward(model, batch, args):
         decoder_fuse_level=args.decoder_fuse_level)
 
 
-def prepare_unet_output(unet, unet_input, flows, warp):
+def prepare_unet_output(unet, unet_input, flows, unet_kernels, unet_bias, warp):
     unet_output1, unet_output2 = [], []
-    unet_outputs = unet(unet_input)
+    unet_outputs = unet(unet_input, unet_kernels, unet_bias)
     for u_out in unet_outputs:
         u_out1, u_out2 = u_out.chunk(2, dim=0)
         unet_output1.append(u_out1)
@@ -211,11 +211,11 @@ def forward_ctx(unet, ctx_frames,unet_kernels,unet_bias):
     return unet_output1, unet_output2
 
 
-def forward_model(model, cooked_batch, ctx_frames, args, v_compress,
+def forward_model(model, cooked_batch, ctx_frames,id_num, args, v_compress,
                   iterations, encoder_fuse_level, decoder_fuse_level):
-    encoder, binarizer, decoder, unet = model
+    encoder, binarizer, decoder, unet, hypernet = model
     res, _, _, flows = cooked_batch
-
+    id_num = Variable(torch.tensor(id_num).cuda())
     ctx_frames = Variable(ctx_frames.cuda()) - 0.5
     frame1 = ctx_frames[:, :3]
     frame2 = ctx_frames[:, 3:]
@@ -235,6 +235,7 @@ def forward_model(model, cooked_batch, ctx_frames, args, v_compress,
     out_imgs = []
     losses = []
 
+    wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
     # UNet.
     with torch.no_grad():
         enc_unet_output1 = Variable(torch.zeros(args.batch_size,)).cuda()
@@ -245,7 +246,7 @@ def forward_model(model, cooked_batch, ctx_frames, args, v_compress,
     if v_compress:
         # Use decoded context frames to decode.
         dec_unet_output1, dec_unet_output2 =  prepare_unet_output(
-            unet, torch.cat([frame1, frame2], dim=0), flows, warp=args.warp)
+            unet, torch.cat([frame1, frame2], dim=0), flows, unet_kernels, unet_bias, warp=args.warp)
 
         enc_unet_output1, enc_unet_output2 = dec_unet_output1, dec_unet_output2
 
@@ -269,16 +270,16 @@ def forward_model(model, cooked_batch, ctx_frames, args, v_compress,
         # Encode.
         encoded, encoder_h_1, encoder_h_2, encoder_h_3 = encoder(
             encoder_input, encoder_h_1, encoder_h_2, encoder_h_3,
-            enc_unet_output1, enc_unet_output2)
+            enc_unet_output1, enc_unet_output2,wenc)
 
         # Binarize.
-        code = binarizer(encoded)
+        code = binarizer(encoded,wbin)
         if args.save_codes:
             codes.append(code.data.cpu().numpy())
 
         output, decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4 = decoder(
             code, decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4,
-            dec_unet_output1, dec_unet_output2)
+            dec_unet_output1, dec_unet_output2,wdec)
 
         res = res - output
         out_img = out_img + output.data.cpu()
