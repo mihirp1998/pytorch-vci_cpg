@@ -4,7 +4,7 @@ from util import get_models, init_lstm, set_train, set_eval
 import torch
 from evaluate import run_eval
 import time
-
+from torch.autograd import Variable
 def get_eval_loaders():
   eval_loader,vid_count = eval_get_loader(is_train=False,root=args.eval, mv_dir=args.eval_mv,n_work=0,args=args)
 
@@ -50,7 +50,9 @@ def resume(load_name, index):
 
 args = parser.parse_args()
 print(args)
+#print(vid_count,"vid")
 eval_loader,vid_count = get_eval_loaders()
+print(vid_count,"vid")
 ############### Model ###############
 encoder, binarizer, decoder, unet,hypernet = get_models(
   args=args, v_compress=args.v_compress, 
