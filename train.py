@@ -28,13 +28,9 @@ train_loader = get_loader(
 def get_eval_loaders():
   # We can extend this dict to evaluate on multiple datasets.
   # change this later
-  eval_loaders = {
-    'TVL': eval_get_loader(
-        is_train=False,
-        root=args.eval, mv_dir=args.eval_mv,n_work=0,
-        args=args),
-  }
-  return eval_loaders
+  eval_loader,vid_count = eval_get_loader(is_train=False,root=args.eval, mv_dir=args.eval_mv,n_work=0,args=args)
+ 
+  return eval_loader,vid_count
 
 
 
