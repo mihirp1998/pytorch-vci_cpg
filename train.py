@@ -131,6 +131,7 @@ if args.load_model_name:
     scheduler.last_epoch = train_iter - 1
     just_resumed = True
 
+all_losses= []
 
 while True:
 
@@ -192,6 +193,7 @@ while True:
             losses.append(res.abs().mean())
 
         bp_t1 = time.time()
+        all_losses.append(losses)
 
         loss = sum(losses) / args.iterations
         loss.backward()
@@ -211,6 +213,7 @@ while True:
                    loss.item(),
                    bp_t1 - bp_t0, 
                    batch_t1 - batch_t0))
+        print(('{:.4f} ' * args.iterations +'\n').format(* [l.data[0] for l in np.array(all_losses).mean(axis=0)]))
 
         if train_iter % 100 == 0:
             print('Loss at each step:')
