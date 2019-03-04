@@ -146,7 +146,7 @@ while True:
 
         solver.zero_grad()
 
-        id_num = Variable(id_num.cuda())
+        id_num = Variable(torch.tensor(id_num).cuda())
 
         # Init LSTM states.
         (encoder_h_1, encoder_h_2, encoder_h_3,
