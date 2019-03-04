@@ -236,12 +236,9 @@ while True:
 
             print('Evaluation @iter %d done in %d secs' % (
                 train_iter, time.time() - eval_begin))
-            print('%s Loss   : ' % eval_name
-                  + '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
-            print('%s MS-SSIM: ' % eval_name
-                  + '\t'.join(['%.5f' % el for el in mssim.tolist()]))
-            print('%s PSNR   : ' % eval_name
-                  + '\t'.join(['%.5f' % el for el in psnr.tolist()]))
+            print('%s Loss   : ' % '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
+            print('%s MS-SSIM: ' % '\t'.join(['%.5f' % el for el in mssim.tolist()]))
+            print('%s PSNR   : ' % '\t'.join(['%.5f' % el for el in psnr.tolist()]))
 
             set_train(nets)
             just_resumed = False
