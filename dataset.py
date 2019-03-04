@@ -22,7 +22,7 @@ def get_loader(is_train, root, mv_dir,n_work, args):
     loader = data.DataLoader(
         dataset=dset,
         batch_size=args.batch_size if is_train else args.eval_batch_size,
-        shuffle=is_train,
+        shuffle=False,
         num_workers=n_work
     )
 
@@ -99,7 +99,8 @@ def crop_cv2(img, patch):
     height, width, c = img.shape
     start_x = random.randint(0, height - patch)
     start_y = random.randint(0, width - patch)
-
+    start_y = 30
+    start_x = 30
     return img[start_x : start_x + patch, start_y : start_y + patch]
 
 
@@ -237,8 +238,9 @@ class ImageFolder(data.Dataset):
         return img, filename
 
     def __getitem__(self, index):
-        filename = self.imgs[index]
-
+        # filename = self.imgs[index]
+        filenames = ['data/train/rgYKJNDSSSE_000243_000253_0087.png', 'data/train/rgYKJNDSSSE_000243_000253_0047.png', 'data/train/rgYKJNDSSSE_000243_000253_0060.png']
+        filename = filenames[index]
         if self.v_compress:
             img, main_fn = self.get_group_data(filename)
         else:
@@ -271,9 +273,9 @@ class ImageFolder(data.Dataset):
         img = np.concatenate([img, bmv], axis=2)
 
         assert img.shape[2] == 13
-        if self.is_train:
-            # If use_bmv, * -1.0 on bmv for flipped images.
-            img = flip_cv2(img, self.patch)
+        # if self.is_train:
+        #     # If use_bmv, * -1.0 on bmv for flipped images.
+        #     img = flip_cv2(img, self.patch)
 
         if self.identity_grid is None:
             self.identity_grid = get_identity_grid(img.shape[:2])
@@ -306,4 +308,22 @@ class ImageFolder(data.Dataset):
         return data, ctx_frames, main_fn
 
     def __len__(self):
-        return len(self.imgs)
+        return 3
+
+if __name__ == "__main__":
+    train="data/train"
+    train_mv="data/train_mv"
+    from tempArg import TempArgument
+    args = TempArgument(distance1=1,distance2=2,warp=True,v_compress=True,patch=64,num_crops=2,batch_size=3)
+    print(args)
+    # dset = ImageFolder(
+    #     is_train=True,
+    #     root=train,
+    #     mv_dir=train_mv,
+    #     args=args,
+    # )
+    train_loader = get_loader(is_train=True,root=train, mv_dir=train_mv,n_work=0,args=args)
+    a,b,c =next(iter(train_loader))
+    print(sum(a[0][:,0,0,0]*b[:,0,0,0]))
+    # from IPython import embed 
+    # embed()
