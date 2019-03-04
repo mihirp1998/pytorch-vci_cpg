@@ -57,7 +57,7 @@ class inconv(nn.Module):
         self.conv = double_conv(in_ch, out_ch)
 
     def forward(self, x):
-        x = self.conv(x,conv_w,conv_b)
+        x = self.conv(x)
         return x
 
 
@@ -70,7 +70,7 @@ class down(nn.Module):
 
     def forward(self, x):
         x = self.maxpool(x)
-        x = self.mpconv(x, conv_w, conv_b)
+        x = self.mpconv(x)
         return x
 
 
