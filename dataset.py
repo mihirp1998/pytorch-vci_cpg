@@ -104,7 +104,7 @@ def crop_cv2(img, patch):
     start_x = random.randint(0, height - patch)
     start_y = random.randint(0, width - patch)
     start_y = 30
-    start_x = 30
+    start_x =  30
 
     return img[start_x : start_x + patch, start_y : start_y + patch]
 
@@ -335,18 +335,18 @@ class ImageFolder(data.Dataset):
 
 
     def __getitem__(self, index):
-        # vidname = self.id_names[index]
+        vidname = self.id_names[index]
         # random.shuffle(self.d[vidname])
-        # filenames = self.d[vidname][:3]
+        filenames = self.d[vidname][:3]
         # print(filenames)
-        filenames = ['data/train/rgYKJNDSSSE_000243_000253_0087.png', 'data/train/rgYKJNDSSSE_000243_000253_0047.png', 'data/train/rgYKJNDSSSE_000243_000253_0060.png']
+        #filenames = ['data/train/rgYKJNDSSSE_000243_000253_0087.png', 'data/train/rgYKJNDSSSE_000243_000253_0047.png', 'data/train/rgYKJNDSSSE_000243_000253_0060.png']
         # self.id_num = self.vid2id[vidname]
         self.data_s = []
         self.ctx_frames_s = []
         self.main_fn_s = []
         status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
         self.data_s, self.ctx_frames_s = (torch.stack(self.data_s).transpose(0,1),torch.stack(self.ctx_frames_s))
-        return self.data_s, self.ctx_frames_s, self.main_fn_s
+        return self.data_s, self.ctx_frames_s, self.main_fn_s,torch.tensor(2)
 
     def __len__(self):
         return len(self.id_names)
