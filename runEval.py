@@ -77,6 +77,10 @@ if just_resumed:
   set_eval(nets)
 
   eval_begin = time.time()
+  
+  id_num = Variable(torch.tensor(2).cuda())
+  wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
+
   eval_loss, mssim, psnr = run_eval(nets, eval_loader, args,
       output_suffix='iter%d' % 0)
 
