@@ -203,7 +203,7 @@ while True:
         all_losses.append(losses)
 
         loss = sum(losses) / args.iterations
-        loss.backward()
+        #loss.backward()
 
         for net in [encoder, binarizer, decoder, unet]:
             if net is not None:
@@ -220,7 +220,7 @@ while True:
                    loss.item(),
                    bp_t1 - bp_t0, 
                    batch_t1 - batch_t0))
-        print(('{:.4f} ' * args.iterations +'\n').format(* [l.data[0] for l in np.array(all_losses).mean(axis=0)]))
+        print(('{:.4f} ' * args.iterations +'\n').format(* [l for l in np.array(all_losses).mean(axis=0)]))
 
         if train_iter % 100 == 0:
             print('Loss at each step:')
