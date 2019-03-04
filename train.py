@@ -13,7 +13,7 @@ from evaluate import run_eval
 from train_options import parser
 from util import get_models, init_lstm, set_train, set_eval
 from util import prepare_inputs, forward_ctx
-
+import pickle
 args = parser.parse_args()
 print(args)
 
@@ -139,13 +139,16 @@ while True:
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
         scheduler.step()
         train_iter += 1
+        pickle.dump(crops,open("crop.p","wb"))
+        pickle.dump(ctx_frames,open("ctx_frames.p","wb"))
+        pickle.dump(id_num,open("id_num.p","wb"))
 
         if train_iter > args.max_train_iters:
           break
 
         batch_t0 = time.time()
 
-        solver.zero_grad()
+        # solver.zero_grad()
 
         id_num = Variable(torch.tensor(id_num).cuda())
 
@@ -206,7 +209,7 @@ while True:
             if net is not None:
                 torch.nn.utils.clip_grad_norm(net.parameters(), args.clip)
 
-        solver.step()
+        # solver.step()
 
         batch_t1 = time.time()
 
