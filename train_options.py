@@ -57,7 +57,7 @@ parser.add_argument('--schedule', default='50000,60000,70000,80000,90000', type=
                     help='Schedule milestones.')
 parser.add_argument('--gamma', type=float, default=0.5,
                     help='LR decay factor.')
-parser.add_argument('--batch-size', type=int, default=16, 
+parser.add_argument('--batch-size', type=int, default=3, 
                     help='Batch size.')
 parser.add_argument('--eval-batch-size', type=int, default=1,
                     help='Batch size for evaluation.')
