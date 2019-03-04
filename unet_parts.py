@@ -79,7 +79,7 @@ class up(nn.Module):
         else:
             self.up = nn.ConvTranspose2d(in_ch, out_ch, 2, stride=2)
 
-        self.conv = double_conv(in_ch, out_ch, conv_w, conv_b)
+        self.conv = double_conv(in_ch, out_ch)
 
     def forward(self, x1, x2):
         x1 = self.up(x1)
