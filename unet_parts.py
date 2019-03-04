@@ -77,8 +77,8 @@ class up(nn.Module):
         #  but my machine do not have enough memory to handle all those weights
         if bilinear:
             self.up = nn.UpsamplingBilinear2d(scale_factor=2)
-        else:
-            self.up = nn.ConvTranspose2d(in_ch, out_ch, 2, stride=2)
+        # else:
+        #     self.up = nn.ConvTranspose2d(in_ch, out_ch, 2, stride=2)
 
         self.conv = double_conv(in_ch, out_ch)
 
@@ -92,12 +92,3 @@ class up(nn.Module):
         x = self.conv(x, conv_w, conv_b)
         return x
 
-
-class outconv(nn.Module):
-    def __init__(self, in_ch, out_ch):
-        super(outconv, self).__init__()
-        self.conv = nn.Conv2d(in_ch, out_ch, 1)
-
-    def forward(self, x):
-        x = self.conv(x)
-        return x
