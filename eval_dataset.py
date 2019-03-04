@@ -345,6 +345,8 @@ if __name__ == "__main__":
         mv_dir=train_mv,
         args=args,
     )
-    train_loader = get_loader(is_train=True,root=train, mv_dir=train_mv,n_work=0,args=args)
+    train_loader,vidcount = get_loader(is_train=True,root=train, mv_dir=train_mv,n_work=0,args=args)
+    a= next(iter(train_loader))
+    print(len(a))
     from IPython import embed 
     embed()
