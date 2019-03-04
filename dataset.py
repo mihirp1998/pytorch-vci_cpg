@@ -328,7 +328,7 @@ class ImageFolder(data.Dataset):
         ctx_frames /= 255.0
         ctx_frames = np_to_torch(ctx_frames)
 
-        self.data_s.append(torch.stack(data))
+        self.data_s.append(torch.stack([data]))
         self.ctx_frames_s.append(ctx_frames)
         self.main_fn_s.append(main_fn)
 
