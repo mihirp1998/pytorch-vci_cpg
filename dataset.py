@@ -314,7 +314,7 @@ class ImageFolder(data.Dataset):
 
 
         # CV2 cropping in CPU is faster.
-        if self.is_train:
+        if self.is_train and False:
             crops = []
             for i in range(self._num_crops):
                 crop = crop_cv2(img, self.patch)
@@ -342,7 +342,7 @@ class ImageFolder(data.Dataset):
         # print(index)
 	#>>>>>>> ecd24e710dc9d4ce6715bb198bb5f0fba9a7f221
         random.shuffle(self.d[vidname])
-        filenames = self.d[vidname][:10]
+        filenames = self.d[vidname][:1]
         self.id_num = self.vid2id[vidname]
         self.data_s = []
         self.ctx_frames_s = []

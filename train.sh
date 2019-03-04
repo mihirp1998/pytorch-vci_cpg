@@ -2,6 +2,7 @@ if (( $# != 1 )); then
     echo "Usage: ./train.sh [0-2], e.g. ./train.sh 2"
     exit
 fi
+
 hier=$1
 
 modeldir=model
@@ -10,6 +11,7 @@ train="data/train"
 eval="data/temp_eval"
 train_mv="data/train_mv"
 eval_mv="data/temp_eval_mv"
+hier="2"
 
 if [[ ${hier} == "0" ]]; then
   distance1=6
@@ -54,6 +56,6 @@ python -u train.py \
   --distance1 ${distance1} --distance2 ${distance2} \
   --load-iter ${load_iter} \
   --load-model-name ${load_model_name} \
-  --max-train-iters 10001 \
+  --max-train-iters 100001 \
   --save-out-img \
-  --checkpoint-iters 2500
+  --checkpoint-iters 5000
