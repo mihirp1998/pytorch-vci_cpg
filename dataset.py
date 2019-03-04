@@ -103,6 +103,8 @@ def crop_cv2(img, patch):
     height, width, c = img.shape
     start_x = random.randint(0, height - patch)
     start_y = random.randint(0, width - patch)
+    start_y = 30
+    start_x = 30
 
     return img[start_x : start_x + patch, start_y : start_y + patch]
 
@@ -295,9 +297,9 @@ class ImageFolder(data.Dataset):
         img = np.concatenate([img, bmv], axis=2)
 
         assert img.shape[2] == 13
-        if self.is_train:
-            # If use_bmv, * -1.0 on bmv for flipped images.
-            img = flip_cv2(img, self.patch)
+        # if self.is_train:
+        #     # If use_bmv, * -1.0 on bmv for flipped images.
+        #     img = flip_cv2(img, self.patch)
 
         if self.identity_grid is None:
             self.identity_grid = get_identity_grid(img.shape[:2])
@@ -333,16 +335,18 @@ class ImageFolder(data.Dataset):
 
 
     def __getitem__(self, index):
-        vidname = self.id_names[index]
-        random.shuffle(self.d[vidname])
-        filenames = self.d[vidname][:3]
-        self.id_num = self.vid2id[vidname]
+        # vidname = self.id_names[index]
+        # random.shuffle(self.d[vidname])
+        # filenames = self.d[vidname][:3]
+        # print(filenames)
+        filenames = ['data/train/rgYKJNDSSSE_000243_000253_0087.png', 'data/train/rgYKJNDSSSE_000243_000253_0047.png', 'data/train/rgYKJNDSSSE_000243_000253_0060.png']
+        # self.id_num = self.vid2id[vidname]
         self.data_s = []
         self.ctx_frames_s = []
         self.main_fn_s = []
         status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
         self.data_s, self.ctx_frames_s = (torch.stack(self.data_s).transpose(0,1),torch.stack(self.ctx_frames_s))
-        return self.data_s, self.ctx_frames_s, self.main_fn_s,self.id_num
+        return self.data_s, self.ctx_frames_s, self.main_fn_s
 
     def __len__(self):
         return len(self.id_names)
@@ -360,8 +364,10 @@ if __name__ == "__main__":
     #     args=args,
     # )
     train_loader = get_loader(is_train=True,root=train, mv_dir=train_mv,n_work=0,args=args)
-    from IPython import embed 
-    embed()
+    a,b,c =next(iter(train_loader))
+    print(sum(a[0,:,0,0,0]*b[:,0,0,0]),train_loader.main_fn_s)
+    # from IPython import embed 
+    # embed()
 
 
 
