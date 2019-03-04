@@ -28,15 +28,15 @@ class UNet(nn.Module):
         self.up3 = up(256 // shrink, 64 // shrink)
         # self.up4 = up(128 // shrink, 64 // shrink)
 
-    def forward(self, x, unet_kernels,unet_bias):
-        x1 = self.inc(x, unet_kernels[0:2],unet_bias[0:2])
-        x2 = self.down1(x1, unet_kernels[2:4],unet_bias[2:4])
-        x3 = self.down2(x2, unet_kernels[4:6],unet_bias[4:6])
-        x4 = self.down3(x3, unet_kernels[6:8],unet_bias[6:8])
-        x5 = self.down4(x4, unet_kernels[8:10],unet_bias[8:10])
-        out1 = self.up1(x5, x4, unet_kernels[10:12],unet_bias[10:12])
-        out2 = self.up2(out1, x3, unet_kernels[12:14],unet_bias[12:14])
-        out3 = self.up3(out2, x2, unet_kernels[14:16],unet_bias[14:16])
+    def forward(self, x):
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
+        out1 = self.up1(x5, x4)
+        out2 = self.up2(out1, x3)
+        out3 = self.up3(out2, x2)
         return [out1, out2, out3]
 
 if __name__ == "__main__":

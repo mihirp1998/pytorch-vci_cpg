@@ -195,14 +195,14 @@ def prepare_inputs(crops, args, unet_output1, unet_output2):
     return res, frame1, frame2, warped_unet_output1, warped_unet_output2
 
 
-def forward_ctx(unet, ctx_frames,unet_kernels,unet_bias):
+def forward_ctx(unet, ctx_frames):
     ctx_frames = Variable(ctx_frames.cuda()) - 0.5
     frame1 = ctx_frames[:, :3]
     frame2 = ctx_frames[:, 3:]
 
     unet_output1, unet_output2 = [], []
 
-    unet_outputs = unet(torch.cat([frame1, frame2], dim=0),unet_kernels,unet_bias)
+    unet_outputs = unet(torch.cat([frame1, frame2], dim=0))
     for u_out in unet_outputs:
         u_out1, u_out2 = u_out.chunk(2, dim=0)
         unet_output1.append(u_out1)

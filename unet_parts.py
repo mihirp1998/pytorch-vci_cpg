@@ -32,17 +32,17 @@ class double_conv(nn.Module):
             param.requires_grad = False
         
 
-    def forward(self, x,conv_ws,conv_bs):
-        conv_w = self.conv.weight
-        conv_b = self.conv.bias
+    def forward(self, x):
+        # conv_w = self.conv.weight
+        # conv_b = self.conv.bias
         x = self.conv(x)
         # x= F.conv2d(x,conv_w,conv_b,padding=1)
 
         x = self.batch(x)
         x = self.relu(x)
 
-        conv1_w =  self.conv1.weight
-        conv1_b =  self.conv1.bias
+        # conv1_w =  self.conv1.weight
+        # conv1_b =  self.conv1.bias
 
         # x= F.conv2d(x,conv1_w,conv1_b,padding=1)
         x = self.conv1(x)
@@ -56,7 +56,7 @@ class inconv(nn.Module):
         super(inconv, self).__init__()
         self.conv = double_conv(in_ch, out_ch)
 
-    def forward(self, x, conv_w, conv_b):
+    def forward(self, x):
         x = self.conv(x,conv_w,conv_b)
         return x
 
@@ -68,7 +68,7 @@ class down(nn.Module):
         self.mpconv =  double_conv(in_ch, out_ch)
 
 
-    def forward(self, x, conv_w, conv_b):
+    def forward(self, x):
         x = self.maxpool(x)
         x = self.mpconv(x, conv_w, conv_b)
         return x
@@ -87,7 +87,7 @@ class up(nn.Module):
 
         self.conv = double_conv(in_ch, out_ch)
 
-    def forward(self, x1, x2,conv_w, conv_b):
+    def forward(self, x1, x2):
         x1 = self.up(x1)
         diffX = x1.size()[2] - x2.size()[2]
         diffY = x1.size()[3] - x2.size()[3]

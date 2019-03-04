@@ -158,10 +158,10 @@ while True:
             batch_size=(crops[0].size(0) * args.num_crops), height=crops[0].size(2),
             width=crops[0].size(3), args=args)
 
-        wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
+        # wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
         # Forward U-net.
         if args.v_compress:
-            unet_output1, unet_output2 = forward_ctx(unet, ctx_frames,unet_kernels,unet_bias)
+            unet_output1, unet_output2 = forward_ctx(unet, ctx_frames)
         else:
             unet_output1 = Variable(torch.zeros(args.batch_size,)).cuda()
             unet_output2 = Variable(torch.zeros(args.batch_size,)).cuda()
@@ -185,15 +185,15 @@ while True:
             # Encode.
             encoded, encoder_h_1, encoder_h_2, encoder_h_3 = encoder(
                 encoder_input, encoder_h_1, encoder_h_2, encoder_h_3,
-                warped_unet_output1, warped_unet_output2,wenc)
+                warped_unet_output1, warped_unet_output2)
 
             # Binarize.
-            codes = binarizer(encoded,wbin)
+            codes = binarizer(encoded)
 
             # Decode.
             (output, decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4) = decoder(
                 codes, decoder_h_1, decoder_h_2, decoder_h_3, decoder_h_4,
-                warped_unet_output1, warped_unet_output2,wdec)
+                warped_unet_output1, warped_unet_output2)
 
             res = res - output
             out_img = out_img + output.data
