@@ -137,8 +137,8 @@ class ConvLSTMCellTemp(ConvRNNCellBase):
     def forward(self, input ,conv_w_i, conv_w_h, hidden):
         hx, cx = hidden
 
-        conv_w_i = self.conv_ih.weight + conv_w_i
-        conv_w_h = self.conv_hh.weight + conv_w_h
+        conv_w_i = self.conv_ih.weight 
+        conv_w_h = self.conv_hh.weight 
         #hx =hx.view(1,-1,hx.shape[2],hx.shape[3])
         #print(conv_w_i.shape,"weird")
         # gates = self.conv_ih(input) + self.conv_hh(hx)

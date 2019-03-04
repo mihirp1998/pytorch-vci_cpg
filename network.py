@@ -58,7 +58,7 @@ class EncoderCell(nn.Module):
     def forward(self, input, hidden1, hidden2, hidden3,
                 unet_output1, unet_output2,wenc):
         init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = wenc
-        init_conv=  self.conv.weight + init_conv
+        init_conv=  self.conv.weight
 
         x= F.conv2d(input,init_conv,stride=2,padding=1)
         # Fuse
@@ -91,7 +91,7 @@ class Binarizer(nn.Module):
         self.sign = Sign()
 
     def forward(self, input,init_conv):
-        init_conv =  self.conv.weight + init_conv
+        init_conv =  self.conv.weight
         feat = F.conv2d(input,init_conv,stride=1,padding=0)
         x = F.tanh(feat)
         return self.sign(x)
@@ -164,7 +164,7 @@ class DecoderCell(nn.Module):
                 unet_output1, unet_output2,wdec):
         init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h,rnn4_i,rnn4_h,final_conv = wdec
 
-        init_conv = init_conv + self.conv1.weight
+        init_conv = self.conv1.weight
 
         x= F.conv2d(input,init_conv,stride=1,padding=0)
 
@@ -202,7 +202,7 @@ class DecoderCell(nn.Module):
         x = hidden4[0]
         x = F.pixel_shuffle(x, 2)
 
-        final_conv = final_conv + self.conv2.weight
+        final_conv = self.conv2.weight
         x= F.conv2d(x,final_conv,stride=1,padding=0)
 
         x = F.tanh(x) / 2
