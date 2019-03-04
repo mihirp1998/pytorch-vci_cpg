@@ -267,4 +267,5 @@ if __name__ == "__main__":
     a,b,c,d,e = hn(torch.tensor(2))
     print([i.shape for i in a],[i.shape for i in b],c.shape)
     print([i.shape for i in d  ],[i.shape for i in e])
+    print(a[0][0],"val")
 
