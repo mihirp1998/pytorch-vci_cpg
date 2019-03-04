@@ -103,9 +103,9 @@ def crop_cv2(img, patch):
     height, width, c = img.shape
     start_x = random.randint(0, height - patch)
     start_y = random.randint(0, width - patch)
-    #start_x =30
-    #start_y =30
-    return img[start_x : start_x + patch, start_y : start_y + patch]
+    start_x =0
+    start_y =0
+    return img[start_x : start_x + height, start_y : start_y + width]
 
 
 def flip_cv2(img, patch):
@@ -314,7 +314,7 @@ class ImageFolder(data.Dataset):
 
 
         # CV2 cropping in CPU is faster.
-        if self.is_train and False:
+        if self.is_train:
             crops = []
             for i in range(self._num_crops):
                 crop = crop_cv2(img, self.patch)
@@ -328,7 +328,7 @@ class ImageFolder(data.Dataset):
         ctx_frames /= 255.0
         ctx_frames = np_to_torch(ctx_frames)
 
-        self.data_s.append(torch.stack([data]))
+        self.data_s.append(torch.stack(data))
         self.ctx_frames_s.append(ctx_frames)
         self.main_fn_s.append(main_fn)
 

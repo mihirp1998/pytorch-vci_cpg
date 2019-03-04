@@ -133,6 +133,7 @@ while True:
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
         scheduler.step()
         train_iter += 1
+        print(crops.shape,"shape")
         #crops = pickle.load(open("crop1.p","rb"))
         #ctx_frames = pickle.load(open("ctx_frames1.p","rb"))
         # id_num = pickle.load(open("id_num.p","rb"))
