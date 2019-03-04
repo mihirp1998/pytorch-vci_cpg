@@ -42,7 +42,7 @@ encoder, binarizer, decoder, unet,hypernet = get_models(
   args=args, v_compress=args.v_compress, 
   bits=args.bits,
   encoder_fuse_level=args.encoder_fuse_level,
-  decoder_fuse_level=args.decoder_fuse_level,num_vids=args.)
+  decoder_fuse_level=args.decoder_fuse_level,num_vids=train_loader.vid_count)
 
 nets = [encoder, binarizer, decoder]
 if unet is not None:
