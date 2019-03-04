@@ -57,7 +57,7 @@ class EncoderCell(nn.Module):
 
     def forward(self, input, hidden1, hidden2, hidden3,
                 unet_output1, unet_output2,wenc=None):
-        init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = wenc
+        # init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = wenc
         init_conv=  self.conv.weight
         x = self.conv(input)
         # x= F.conv2d(input,init_conv,stride=2,padding=1)
@@ -65,19 +65,19 @@ class EncoderCell(nn.Module):
         if self.v_compress and self.fuse_encoder:
             x = torch.cat([x, unet_output1[2], unet_output2[2]], dim=1)
 
-        hidden1 = self.rnn1(x,rnn1_i,rnn1_h, hidden1)
+        hidden1 = self.rnn1(x, hidden1)
         x = hidden1[0]
         # Fuse.
         if self.v_compress and self.fuse_encoder and self.fuse_level >= 2:
             x = torch.cat([x, unet_output1[1], unet_output2[1]], dim=1)
 
-        hidden2 = self.rnn2(x,rnn2_i,rnn2_h,hidden2)
+        hidden2 = self.rnn2(x,hidden2)
         x = hidden2[0]
         # Fuse.
         if self.v_compress and self.fuse_encoder and self.fuse_level >= 3:
             x = torch.cat([x, unet_output1[0], unet_output2[0]], dim=1)
 
-        hidden3 = self.rnn3(x,rnn3_i,rnn3_h,hidden3)
+        hidden3 = self.rnn3(x,hidden3)
         x = hidden3[0]
         return x, hidden1, hidden2, hidden3
 
@@ -92,7 +92,7 @@ class Binarizer(nn.Module):
 
     def forward(self, input):
         init_conv= None
-        init_conv =  self.conv.weight
+        # init_conv =  self.conv.weight
         feat = self.conv(input)
         # feat = F.conv2d(input,init_conv,stride=1,padding=0)
         x = F.tanh(feat)
@@ -164,14 +164,14 @@ class DecoderCell(nn.Module):
 
     def forward(self, input, hidden1, hidden2, hidden3, hidden4,
                 unet_output1, unet_output2):
-        init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h,rnn4_i,rnn4_h,final_conv = wdec
+        # init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h,rnn4_i,rnn4_h,final_conv = wdec
         wdec = None
-        init_conv = self.conv1.weight
+        # init_conv = self.conv1.weight
 
         # x= F.conv2d(input,init_conv,stride=1,padding=0)
 
         x = self.conv1(input)
-        hidden1 = self.rnn1(x,rnn1_i,rnn1_h,hidden1)
+        hidden1 = self.rnn1(x,hidden1)
 
         # rnn 2
         x = hidden1[0]
@@ -180,7 +180,7 @@ class DecoderCell(nn.Module):
         if self.v_compress and self.fuse_level >= 3:
             x = torch.cat([x, unet_output1[0], unet_output2[0]], dim=1)
 
-        hidden2 = self.rnn2(x,rnn2_i,rnn2_h, hidden2)
+        hidden2 = self.rnn2(x, hidden2)
 
         # rnn 3
         x = hidden2[0]
@@ -189,7 +189,7 @@ class DecoderCell(nn.Module):
         if self.v_compress and self.fuse_level >= 2:
             x = torch.cat([x, unet_output1[1], unet_output2[1]], dim=1)
 
-        hidden3 = self.rnn3(x,rnn3_i,rnn3_h,hidden3)
+        hidden3 = self.rnn3(x,hidden3)
 
         # rnn 4
         x = hidden3[0]
@@ -198,13 +198,13 @@ class DecoderCell(nn.Module):
         if self.v_compress:
             x = torch.cat([x, unet_output1[2], unet_output2[2]], dim=1)
 
-        hidden4 = self.rnn4(x, rnn4_i, rnn4_h, hidden4)
+        hidden4 = self.rnn4(x, hidden4)
 
         # final
         x = hidden4[0]
         x = F.pixel_shuffle(x, 2)
 
-        final_conv = self.conv2.weight
+        final_conv = self.conv2.weig÷ht
         # x= F.conv2d(x,final_conv,stride=1,padding=0)
         x = self.conv2(x)
 
