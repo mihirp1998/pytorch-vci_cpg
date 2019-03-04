@@ -44,7 +44,7 @@ encoder, binarizer, decoder, unet,hypernet = get_models(
   encoder_fuse_level=args.encoder_fuse_level,
   decoder_fuse_level=args.decoder_fuse_level,num_vids=train_loader.vid_count)
 
-nets = [encoder, binarizer, decoder,unet]
+nets = [encoder, binarizer, decoder,unet,hypernet]
 #if unet is not None:
 #  nets.append(unet)
 
@@ -82,7 +82,7 @@ def replace(kval):
 
 def resume(load_name, index):
   names = ['encoder', 'binarizer', 'decoder', 'unet']
-  for net_idx, net in enumerate(nets):
+  for net_idx, net in enumerate(nets[:4]):
     if net_idx != 3:
       name = names[net_idx]
       checkpoint_path = '{}/{}_{}_epoch_{:08d}.pth'.format(args.model_dir, load_name, name, index)
@@ -204,7 +204,7 @@ while True:
         loss = sum(losses) / args.iterations
         loss.backward()
 
-        for net in [encoder, binarizer, decoder, unet]:
+        for net in [encoder, binarizer, decoder, unet,hypernet]:
             if net is not None:
                 torch.nn.utils.clip_grad_norm(net.parameters(), args.clip)
 

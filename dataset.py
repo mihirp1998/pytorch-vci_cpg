@@ -23,12 +23,12 @@ def get_loader(is_train, root, mv_dir,n_work, args):
         args=args,
     )
 
-    # loader = data.DataLoader(
-    #     dataset=dset,
-    #     batch_size=args.batch_size if is_train else args.eval_batch_size,
-    #     shuffle=is_train,
-    #     num_workers=n_work
-    # )
+    loader = data.DataLoader(
+        dataset=dset,
+        batch_size=1,
+        shuffle=is_train,
+        num_workers=0
+    )
 
     # print('Loader for {} images ({} batches) created.'.format(
     #     len(dset), len(loader))
@@ -341,7 +341,9 @@ class ImageFolder(data.Dataset):
         self.data_s = []
         self.ctx_frames_s = []
         self.main_fn_s = []
-        status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
+        for i in filenames:
+            self.load_data(i)
+        # status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
         self.data_s, self.ctx_frames_s = (torch.stack(self.data_s).transpose(0,1),torch.stack(self.ctx_frames_s))
         return self.data_s, self.ctx_frames_s, self.main_fn_s,self.id_num
 
