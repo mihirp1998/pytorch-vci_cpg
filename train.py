@@ -154,7 +154,7 @@ while True:
             batch_size=(crops[0].size(0) * args.num_crops), height=crops[0].size(2),
             width=crops[0].size(3), args=args)
 
-         wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
+        wenc,wdec,wbin,unet_kernels,unet_bias = hypernet(id_num)
         # Forward U-net.
         if args.v_compress:
             unet_output1, unet_output2 = forward_ctx(unet, ctx_frames,unet_kernels,unet_bias)
