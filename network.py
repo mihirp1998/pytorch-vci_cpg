@@ -59,8 +59,8 @@ class EncoderCell(nn.Module):
                 unet_output1, unet_output2,wenc):
         init_conv,rnn1_i,rnn1_h,rnn2_i,rnn2_h,rnn3_i,rnn3_h = wenc
         init_conv=  self.conv.weight
-
-        x= F.conv2d(input,init_conv,stride=2,padding=1)
+        x = self.conv(input)
+        # x= F.conv2d(input,init_conv,stride=2,padding=1)
         # Fuse
         if self.v_compress and self.fuse_encoder:
             x = torch.cat([x, unet_output1[2], unet_output2[2]], dim=1)
@@ -92,7 +92,8 @@ class Binarizer(nn.Module):
 
     def forward(self, input,init_conv):
         init_conv =  self.conv.weight
-        feat = F.conv2d(input,init_conv,stride=1,padding=0)
+        feat = self.conv(input)
+        # feat = F.conv2d(input,init_conv,stride=1,padding=0)
         x = F.tanh(feat)
         return self.sign(x)
 
@@ -166,9 +167,9 @@ class DecoderCell(nn.Module):
 
         init_conv = self.conv1.weight
 
-        x= F.conv2d(input,init_conv,stride=1,padding=0)
+        # x= F.conv2d(input,init_conv,stride=1,padding=0)
 
-        # x = self.conv1(input)
+        x = self.conv1(input)
         hidden1 = self.rnn1(x,rnn1_i,rnn1_h,hidden1)
 
         # rnn 2
@@ -203,7 +204,8 @@ class DecoderCell(nn.Module):
         x = F.pixel_shuffle(x, 2)
 
         final_conv = self.conv2.weight
-        x= F.conv2d(x,final_conv,stride=1,padding=0)
+        # x= F.conv2d(x,final_conv,stride=1,padding=0)
+        x = self.conv2(x)
 
         x = F.tanh(x) / 2
 

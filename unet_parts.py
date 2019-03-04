@@ -35,8 +35,8 @@ class double_conv(nn.Module):
     def forward(self, x,conv_ws,conv_bs):
         conv_w = self.conv.weight
         conv_b = self.conv.bias
-        # x = self.conv(x)
-        x= F.conv2d(x,conv_w,conv_b,padding=1)
+        x = self.conv(x)
+        # x= F.conv2d(x,conv_w,conv_b,padding=1)
 
         x = self.batch(x)
         x = self.relu(x)
@@ -44,8 +44,8 @@ class double_conv(nn.Module):
         conv1_w =  self.conv1.weight
         conv1_b =  self.conv1.bias
 
-        x= F.conv2d(x,conv1_w,conv1_b,padding=1)
-        # x = self.conv1(x)
+        # x= F.conv2d(x,conv1_w,conv1_b,padding=1)
+        x = self.conv1(x)
         x = self.batch1(x)
         x = self.relu1(x)
         return x

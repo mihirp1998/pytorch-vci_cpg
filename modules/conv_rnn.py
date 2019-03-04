@@ -141,7 +141,7 @@ class ConvLSTMCellTemp(ConvRNNCellBase):
         conv_w_h = self.conv_hh.weight 
         #hx =hx.view(1,-1,hx.shape[2],hx.shape[3])
         #print(conv_w_i.shape,"weird")
-        # gates = self.conv_ih(input) + self.conv_hh(hx)
+        gates = self.conv_ih(input) + self.conv_hh(hx)
         # print("hx",input.shape,hx.shape)
         #gate_input =  F.conv2d(input, conv_w_i, groups=self.batchsize,stride=self.stride,padding=self.padding)
         #gate_hidden =  F.conv2d(hx, conv_w_h, groups=self.batchsize,stride=1,padding=self.hidden_padding)
@@ -149,12 +149,12 @@ class ConvLSTMCellTemp(ConvRNNCellBase):
         #gate_input = gate_input.view(self.batchsize,512,gate_input.shape[2],gate_input.shape[3])
         #gate_hidden = gate_hidden.view(self.batchsize,512,gate_hidden.shape[2],gate_hidden.shape[3])
         #print(gate_input.shape,gate_hidden.shape)
-        gate_input =  F.conv2d(input,conv_w_i,stride=self.stride,padding=self.padding)
-        gate_hidden = F.conv2d(hx,conv_w_h,stride=1,padding=self.hidden_padding)
+        # gate_input =  F.conv2d(input,conv_w_i,stride=self.stride,padding=self.padding)
+        # gate_hidden = F.conv2d(hx,conv_w_h,stride=1,padding=self.hidden_padding)
         #gate_input= batchConv2d(input,conv_w_i,batchsize,stride=self.stride,padding=self.padding,dilation=self.dilation,bias=self.bias)
         #gate_hidden= batchConv2d(hx,conv_w_h,batchsize,stride=1,padding=self.hidden_padding,dilation=1,bias=self.bias)
 
-        gates = gate_input + gate_hidden
+        # gates = gate_input + gate_hidden
 
         ingate, forgetgate, cellgate, outgate = gates.chunk(4, 1)
 
