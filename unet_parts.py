@@ -15,6 +15,8 @@ class double_conv(nn.Module):
         self.conv = nn.Conv2d(in_ch, out_ch, 3, padding=1)
         self.batch = nn.BatchNorm2d(out_ch)
         self.relu = nn.ReLU(inplace=True)
+        for param in self.batch.parameters():
+            param.requires_grad = False
         
         for param in self.conv.parameters():
             param.requires_grad = False
@@ -22,6 +24,9 @@ class double_conv(nn.Module):
         self.conv1 = nn.Conv2d(out_ch, out_ch, 3, padding=1)
         self.batch1 = nn.BatchNorm2d(out_ch)
         self.relu1 = nn.ReLU(inplace=True)
+
+        for param in self.batch1.parameters():
+            param.requires_grad = False
 
         for param in self.conv1.parameters():
             param.requires_grad = False
