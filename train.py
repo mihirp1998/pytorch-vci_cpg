@@ -44,9 +44,9 @@ encoder, binarizer, decoder, unet,hypernet = get_models(
   encoder_fuse_level=args.encoder_fuse_level,
   decoder_fuse_level=args.decoder_fuse_level,num_vids=train_loader.vid_count)
 
-nets = [encoder, binarizer, decoder]
-if unet is not None:
-  nets.append(unet)
+nets = [encoder, binarizer, decoder,unet]
+#if unet is not None:
+#  nets.append(unet)
 
 # print(nets[0].rnn2.weights.shape,"rnn2")
 gpus = [int(gpu) for gpu in args.gpus.split(',')]
