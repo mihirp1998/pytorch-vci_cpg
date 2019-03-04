@@ -87,11 +87,8 @@ if just_resumed:
       output_suffix='iter%d' % 0)
 
   print('Evaluation @iter %d done in %d secs' % (
-      train_iter, time.time() - eval_begin))
-  print('%s Loss   : ' % eval_name
-        + '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
-  print('%s MS-SSIM: ' % eval_name
-        + '\t'.join(['%.5f' % el for el in mssim.tolist()]))
-  print('%s PSNR   : ' % eval_name
-      + '\t'.join(['%.5f' % el for el in psnr.tolist()]))
+      0, time.time() - eval_begin))
+  print('%s Loss   : ' % '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))
+  print('%s MS-SSIM: ' %  '\t'.join(['%.5f' % el for el in mssim.tolist()]))
+  print('%s PSNR   : ' % '\t'.join(['%.5f' % el for el in psnr.tolist()]))
 
