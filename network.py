@@ -204,7 +204,7 @@ class DecoderCell(nn.Module):
         x = hidden4[0]
         x = F.pixel_shuffle(x, 2)
 
-        final_conv = self.conv2.weig÷ht
+        # final_conv = self.conv2.weight
         # x= F.conv2d(x,final_conv,stride=1,padding=0)
         x = self.conv2(x)
 
