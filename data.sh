@@ -25,9 +25,9 @@
 # mode=4digits
 
 
-indir=/Users/mihir/Documents/projects/pytorch-vcii_cpg/data/temp_eval
-outdir=/Users/mihir/Documents/projects/pytorch-vcii_cpg/data/temp_eval_gen
-tmp_prefix=pexel_sub_$1_
+indir=/home_01/f20150198/projects/pytorch-vci_cpg/data/eval
+outdir=/home_01/f20150198/projects/pytorch-vci_cpg/data/temp_eval_gen
+tmp_prefix=temp
 mode=4digits
 
 mkdir ${outdir}
@@ -115,15 +115,15 @@ do
 				echo "prev_frame " $prev_frame
 				echo "next_frame " $next_frame
 				
-				cp $prev_frame tmp_${tmp_prefix}1.jpg
-				cp $cur_frame tmp_${tmp_prefix}2.jpg
+				cp $prev_frame tmp_${tmp_prefix}1.png
+				cp $cur_frame tmp_${tmp_prefix}2.png
 				rm tmp_${tmp_prefix}3.jpg
 
 				cur_frame_name=${cur_frame##*/}
 				cur_frame_name=${cur_frame_name::${#cur_frame_name}-4}
 				echo "cur_frame_name" $cur_frame_name
 				
-				yes | ffmpeg  -i "tmp_${tmp_prefix}%01d.jpg" -c:v libx264 -g 2 -bf 0 -b_strategy 0  -sc_threshold 0 tmp_${tmp_prefix}.mp4
+				yes | ffmpeg  -i "tmp_${tmp_prefix}%01d.png" -c:v libx264 -g 2 -bf 0 -b_strategy 0  -sc_threshold 0 tmp_${tmp_prefix}.mp4
 	# 			# /home/cywu/MV-release/MV_extract/ffmpeg-2.7.2/doc/examples/extract_mvs tmp_${tmp_prefix}.mp4 >tmp_${tmp_prefix}.mvs0
 	# 			# /home/cywu/MV-release/MV_extract/MV-code-release/Release/mpegflow \
 				/home/csadmin/ffmpeg/doc/examples/extract_mvs tmp_${tmp_prefix}.mp4 >tmp_${tmp_prefix}.mvs0
@@ -131,8 +131,8 @@ do
 							tmp_${tmp_prefix}.mvs0 ${outdir}/${cur_frame_name}_before_flow_x ${outdir}/${cur_frame_name}_before_flow_y
 
 
-				cp $next_frame tmp_${tmp_prefix}1.jpg
-				yes | ffmpeg  -i "tmp_${tmp_prefix}%01d.jpg" -c:v libx264 -g 2 -bf 0 -b_strategy 0  -sc_threshold 0 tmp_${tmp_prefix}.mp4
+				cp $next_frame tmp_${tmp_prefix}1.png
+				yes | ffmpeg  -i "tmp_${tmp_prefix}%01d.png" -c:v libx264 -g 2 -bf 0 -b_strategy 0  -sc_threshold 0 tmp_${tmp_prefix}.mp4
 				# /home/cywu/MV-release/MV_extract/ffmpeg-2.7.2/doc/examples/extract_mvs tmp_${tmp_prefix}.mp4 >tmp_${tmp_prefix}.mvs0
 				# /home/cywu/MV-release/MV_extract/MV-code-release/Release/mpegflow \
 				/home/csadmin/ffmpeg/doc/examples/extract_mvs tmp_${tmp_prefix}.mp4 >tmp_${tmp_prefix}.mvs0
