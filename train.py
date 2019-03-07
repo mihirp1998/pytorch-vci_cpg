@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as LS
 from torch.autograd import Variable
+from tensorboardX import SummaryWriter
 
 from dataset import get_loader
 from eval_dataset import get_loader as eval_get_loader
@@ -33,6 +34,7 @@ def get_eval_loaders():
   return eval_loader,vid_count
 
 
+writer = SummaryWriter()
 
 ############### Model ###############
 encoder, binarizer, decoder, unet,hypernet = get_models(
@@ -129,13 +131,13 @@ if args.load_model_name:
 all_losses = []
 solver.zero_grad()
 loss_mini_batch =0
-while True:
-    print("while true began")
+# while True:
+#     print("while true began")
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
-        print("batch not starting")
+        # print("batch not starting")
         scheduler.step()
         train_iter += 1
-        print(crops.shape,"shape")
+        # print(crops.shape,"shape")
         #crops = pickle.load(open("crop1.p","rb"))
         #ctx_frames = pickle.load(open("ctx_frames1.p","rb"))
         # id_num = pickle.load(open("id_num.p","rb"))
@@ -240,6 +242,10 @@ while True:
             eval_loss, mssim, psnr = run_eval(nets, eval_loaders, args,
                 output_suffix='iter%d' % train_iter)
 
+            writer.add_scalar('data/mean_1st iter'eval_loss.tolist()[0], train_iter)
+            writer.add_scalar('data/mean_10th iter',eval_loss.tolist()[10], train_iter)
+            writer.add_scalar('data/mean_15th iter',eval_loss.tolist()[15], train_iter)
+            writer.add_scalar('data/mean_sum_iter',sum(eval_loss.tolist()), train_iter)
             print('Evaluation @iter %d done in %d secs' % (
                 train_iter, time.time() - eval_begin))
             print('%s Loss   : ' % '\t'.join(['%.5f' % el for el in eval_loss.tolist()]))

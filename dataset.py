@@ -337,7 +337,7 @@ class ImageFolder(data.Dataset):
     def __getitem__(self, index):
         random.shuffle(self.id_names)
         vidname = self.id_names[index]
-        print("vidname",vidname)
+        # print("vidname",vidname)
 	#<<<<<<< HEAD
         #print(index)
 	#=======
@@ -350,7 +350,7 @@ class ImageFolder(data.Dataset):
         self.ctx_frames_s = []
         self.main_fn_s = []
         for i in filenames:
-            print("filename",i)
+            # print("filename",i)
             self.load_data(i)
         # status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
         self.data_s, self.ctx_frames_s = (torch.stack(self.data_s).transpose(0,1),torch.stack(self.ctx_frames_s))
