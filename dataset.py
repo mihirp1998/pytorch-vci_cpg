@@ -317,7 +317,8 @@ class ImageFolder(data.Dataset):
         if self.is_train:
             crops = []
             for i in range(self._num_crops):
-                crop = crop_cv2(img, self.patch)
+                # crop = crop_cv2(img, self.patch)
+                crop = img
                 crop[..., :9] /= 255.0
                 crops.append(np_to_torch(crop))
             data = crops
