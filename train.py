@@ -127,7 +127,7 @@ if args.load_model_name:
     just_resumed = True
 
 all_losses = []
-
+solver.zero_grad()
 while True:
 
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
@@ -142,7 +142,7 @@ while True:
 
         batch_t0 = time.time()
 
-        solver.zero_grad()
+        # solver.zero_grad()
 
         id_num = Variable(torch.tensor(id_num).cuda())
 
@@ -197,24 +197,19 @@ while True:
         all_losses.append(losses)
 
         loss = sum(losses) / args.iterations
+        loss = loss/args.update
         loss.backward()
+
+        loss_mini_batch += loss.data[0]
 
         for net in [encoder, binarizer, decoder, unet,hypernet]:
             if net is not None:
                 torch.nn.utils.clip_grad_norm(net.parameters(), args.clip)
 
-        solver.step()
+        # solver.step()
 
         batch_t1 = time.time()
 
-        print(
-            '[TRAIN] Iter[{}]; LR: {}; Loss: {:.6f}; Backprop: {:.4f} sec; Batch: {:.4f} sec'.
-            format(train_iter, 
-                   scheduler.get_lr()[0], 
-                   loss.item(),
-                   bp_t1 - bp_t0, 
-                   batch_t1 - batch_t0))
-        print(('{:.4f} ' * args.iterations +'\n').format(* [l.data[0] for l in np.array(all_losses).mean(axis=0)]))
 
         if train_iter % 100 == 0:
             print('Loss at each step:')
@@ -223,6 +218,14 @@ while True:
 
         if train_iter % args.checkpoint_iters == 0:
             save(train_iter)
+
+        if train_iter % args.update==0:
+            solver.step()
+            solver.zero_grad()
+            print('[TRAIN] Iter[{}]; LR: {}; Loss: {:.6f}; Backprop: {:.4f} sec; Batch: {:.4f} sec'.format(train_iter, scheduler.get_lr()[0], loss_mini_batch, bp_t1 - bp_t0, batch_t1 - batch_t0))
+            loss_mini_batch =0
+            print(('{:.4f} ' * args.iterations +'\n').format(* [l.data[0] for l in np.array(all_losses).mean(axis=0)]))
+            all_losses = []
 
         if just_resumed or train_iter % args.eval_iters == 0:
             print('Start evaluation...')
