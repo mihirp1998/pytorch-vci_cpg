@@ -31,7 +31,8 @@ parser.add_argument('--patch', default=64, type=int,
                     help='Patch size.')
 parser.add_argument('--shrink', type=int, default=2, 
                     help='Reducing # channels in U-net by this factor.')
-
+parser.add_argument('--update', type=int, default=10, 
+                    help='accumul grad update # channels in U-net by this factor.')
 # More model variants for ablation study. Please see paper for details.
 parser.add_argument('--warp', action='store_true',
                     help='Whether to use motion information to warp U-net features.')

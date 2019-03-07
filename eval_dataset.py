@@ -184,7 +184,7 @@ class ImageFolder(data.Dataset):
         self.perVideoInfo()
         # self.vid_freq,self.vid2id = self.genIds()
         # pickle.dump(self.vid2id,open("train_dict.p","wb"))
-        self.vid2id = pickle.load(open("train_dict.p","rb"))
+        self.vid2id = pickle.load(open("train_dict100.p","rb"))
         self.vid_count = len(self.vid2id.keys())
         print("num of videos {} ".format(self.vid_count))
 
@@ -223,7 +223,7 @@ class ImageFolder(data.Dataset):
             else:
                 assert False, 'not implemented.'
 
-        for filename in glob.iglob(self.root + '/*png'):
+        for filename in glob.iglob(self.root + '/*jpg'):
             img_idx = int(filename[:-4].split('_')[-1])
 
             if self.args.v_compress:

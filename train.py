@@ -128,6 +128,7 @@ if args.load_model_name:
 
 all_losses = []
 solver.zero_grad()
+loss_mini_batch =0
 while True:
     print("while true began")
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):

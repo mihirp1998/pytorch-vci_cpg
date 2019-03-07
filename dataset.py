@@ -225,7 +225,7 @@ class ImageFolder(data.Dataset):
             else:
                 assert False, 'not implemented.'
 
-        for filename in glob.iglob(self.root + '/*png'):
+        for filename in glob.iglob(self.root + '/*jpg'):
             img_idx = int(filename[:-4].split('_')[-1])
 
             if self.args.v_compress:
