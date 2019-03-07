@@ -185,9 +185,9 @@ class ImageFolder(data.Dataset):
 
         self._load_image_list()
         self.perVideoInfo()
-        # self.vid_freq,self.vid2id = self.genIds()
-        # pickle.dump(self.vid2id,open("train_dict.p","wb"))
-        self.vid2id = pickle.load(open("train_dict.p","rb"))
+        #self.vid_freq,self.vid2id = self.genIds()
+        pickle.dump(self.vid2id,open("train_dict100.p","wb"))
+        #self.vid2id = pickle.load(open("train_dict.p","rb"))
         if is_train:
             random.shuffle(self.imgs)
 
@@ -349,6 +349,7 @@ class ImageFolder(data.Dataset):
         self.ctx_frames_s = []
         self.main_fn_s = []
         for i in filenames:
+            print(i)
             self.load_data(i)
         # status_lst = Parallel(n_jobs=32,backend="threading")(delayed(self.load_data)(i) for i in filenames)            
         self.data_s, self.ctx_frames_s = (torch.stack(self.data_s).transpose(0,1),torch.stack(self.ctx_frames_s))
