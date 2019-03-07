@@ -131,7 +131,7 @@ if args.load_model_name:
 all_losses = []
 solver.zero_grad()
 loss_mini_batch =0
-# while True:
+while True:
 #     print("while true began")
     for batch, (crops, ctx_frames, _ ,id_num) in enumerate(train_loader):
         # print("batch not starting")
@@ -242,9 +242,9 @@ loss_mini_batch =0
             eval_loss, mssim, psnr = run_eval(nets, eval_loaders, args,
                 output_suffix='iter%d' % train_iter)
 
-            writer.add_scalar('data/mean_1st iter'eval_loss.tolist()[0], train_iter)
-            writer.add_scalar('data/mean_10th iter',eval_loss.tolist()[10], train_iter)
-            writer.add_scalar('data/mean_15th iter',eval_loss.tolist()[15], train_iter)
+            writer.add_scalar('data/mean_1st iter',eval_loss.tolist()[0], train_iter)
+            writer.add_scalar('data/mean_05th iter',eval_loss.tolist()[5], train_iter)
+            writer.add_scalar('data/mean_10th iter',eval_loss.tolist()[9], train_iter)
             writer.add_scalar('data/mean_sum_iter',sum(eval_loss.tolist()), train_iter)
             print('Evaluation @iter %d done in %d secs' % (
                 train_iter, time.time() - eval_begin))
