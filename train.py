@@ -240,7 +240,7 @@ while True:
             solver.zero_grad()
             print('[TRAIN] Iter[{}]; LR: {}; Loss: {:.6f}; Backprop: {:.4f} sec; Batch: {:.4f} sec'.format(train_iter, scheduler.get_lr()[0], loss_mini_batch, bp_t1 - bp_t0, batch_t1 - batch_t0))
             loss_mini_batch =0
-            print(('{:.4f} ' * args.iterations +'\n').format(* [l.data[0] for l in np.array(all_losses).mean(axis=0)]))
+            print(('{:.4f} ' * args.iterations +'\n').format(* [l.data[0] for l in np.array(losses)]))
             all_losses = []
 
         if just_resumed or train_iter % args.eval_iters == 0:
