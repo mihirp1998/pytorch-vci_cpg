@@ -187,7 +187,7 @@ class ImageFolder(data.Dataset):
         self.perVideoInfo()
         #self.vid_freq,self.vid2id = self.genIds()
         pickle.dump(self.vid2id,open("train_dict100.p","wb"))
-        #self.vid2id = pickle.load(open("train_dict.p","rb"))
+        #self.vid2id = pickle.load(open("train_dict100.p","rb"))
         if is_train:
             random.shuffle(self.imgs)
 
@@ -344,8 +344,9 @@ class ImageFolder(data.Dataset):
         # print(index)
 	#>>>>>>> ecd24e710dc9d4ce6715bb198bb5f0fba9a7f221
         random.shuffle(self.d[vidname])
-        filenames = self.d[vidname][:1]
+        filenames = self.d[vidname][:3]
         self.id_num = self.vid2id[vidname]
+        print(self.id_num,vidname,filenames,"info")
         self.data_s = []
         self.ctx_frames_s = []
         self.main_fn_s = []

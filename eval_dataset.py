@@ -265,6 +265,7 @@ class ImageFolder(data.Dataset):
         filename = self.imgs[index]
         id_val = filename.split("/")[2][:-9]
         id_num = self.vid2id[id_val]
+        print("idnum ",id_num)
         if self.v_compress:
             img, main_fn = self.get_group_data(filename)
         else:
