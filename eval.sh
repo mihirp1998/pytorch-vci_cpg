@@ -5,11 +5,10 @@ fi
 hier=$1
 
 modeldir=model
-
-train="data/train"
-eval="data/temp_eval"
-train_mv="data/train_mv"
-eval_mv="data/temp_eval_mv"
+train="data/vidcomp100"
+eval="data/vidcomp100_eval"
+train_mv="data/vidcomp100_mv"
+eval_mv="data/vidcomp100_eval_mv"
 
 if [[ ${hier} == "0" ]]; then
   distance1=6

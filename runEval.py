@@ -38,14 +38,25 @@ def resume(load_name, index):
       pretrain_unet = {replace(k): v for k, v in pretrain_unet.items()}
       # print("pretrain unet",pretrain_unet.keys())
       pretrain_unet_updated = {}
+      
       for k, v in pretrain_unet.items():
         if k in unet_dict:
           pretrain_unet_updated[k] = v
         else:
           print("WARNING: Unable to Load Params {}".format(k))
+
+      pretrain_unet_2 = torch.load("vcii_model_params/demo_unet_00010000.pth")
+      for k, v in pretrain_unet_2.items():
+        if k in unet_dict:
+          pretrain_unet_updated[k] = v
+        else:
+          print("WARNING: Unable to Load Params {}".format(k))
+
       unet_dict.update(pretrain_unet_updated)
       print("Keys not Loaded ",[i for i in unet_dict.keys() if i not in pretrain_unet_updated.keys()])
       net.load_state_dict(unet_dict)
+  hypernet = nets[4]
+  hypernet.load_state_dict(torch.load("vcii_model_params/demo_hypernet_00010000.pth"))s
 
 
 args = parser.parse_args()
